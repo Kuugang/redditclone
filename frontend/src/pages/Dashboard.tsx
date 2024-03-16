@@ -15,20 +15,44 @@ const Dashboard: React.FC = () => {
   const { posts, setPosts } = useContext(MyContext);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [page, setPage] = useState(1);
+  const [isFetching, setIsFetching] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
-        const data = await getPosts();
-        setPosts(data);
+        const data = await getPosts(page);
+        if (page === 1) {
+          setPosts(data);
+        } else {
+          setPosts((prevPosts) => [...prevPosts, ...data]);
+        }
       } catch (error) {
         setError(error);
       } finally {
         setIsLoading(false);
+        setIsFetching(false);
       }
     };
     fetchData();
-  }, [posts]);
+  }, [page]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.innerHeight + document.documentElement.scrollTop !==
+          document.documentElement.offsetHeight ||
+        isFetching
+      )
+        return;
+      setIsFetching(true);
+      setPage((prevPage) => prevPage + 1);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isFetching]);
 
   const timeAgo = (date: string): string => {
     const currentDate = new Date();
@@ -71,12 +95,15 @@ const Dashboard: React.FC = () => {
                 key={post.id}
                 className="border border-black rounded p-5 w-[500px]"
               >
-                <div className="flex flex-row gap-2 items-center">
-                  <h1 className="text-md font-bold">{post.title}</h1>
-                  <p className="text-xs">{timeAgo(post.createdat)}</p>
+                <div className="flex text-xs flex-row gap-2 items-center">
+                  <div className="rounded rounded-full w-[25px] h-[25px] bg-gray-200"></div>
+                  <p className="font-bold">r/{post.community}</p>
+                  <p className="">{timeAgo(post.createdat)}</p>
                 </div>
-
-                <p className="text-sm text-left">{post.content}</p>
+                <div className="text-left">
+                  <h1 className="text-md font-bold">{post.title}</h1>
+                  <p className="text-sm">{post.content}</p>
+                </div>
 
                 <div className="flex flex-row gap-3 text-xs">
                   <div className="flex flex-row gap-1 bg-zinc-200 p-1 rounded">
@@ -94,7 +121,7 @@ const Dashboard: React.FC = () => {
                     </button>
 
                     <div className="flex flex-row items-center">
-                      <h1 className="text-xs">69</h1>
+                      <h1 className="text-xs font-semibold">{post.upvotes}</h1>
                     </div>
 
                     <button className="flex flex-row gap-1 items-center">
@@ -124,7 +151,7 @@ const Dashboard: React.FC = () => {
                     >
                       <path d="M7.725 19.872a.718.718 0 0 1-.607-.328.725.725 0 0 1-.118-.397V16H3.625A2.63 2.63 0 0 1 1 13.375v-9.75A2.629 2.629 0 0 1 3.625 1h12.75A2.63 2.63 0 0 1 19 3.625v9.75A2.63 2.63 0 0 1 16.375 16h-4.161l-4 3.681a.725.725 0 0 1-.489.191ZM3.625 2.25A1.377 1.377 0 0 0 2.25 3.625v9.75a1.377 1.377 0 0 0 1.375 1.375h4a.625.625 0 0 1 .625.625v2.575l3.3-3.035a.628.628 0 0 1 .424-.165h4.4a1.377 1.377 0 0 0 1.375-1.375v-9.75a1.377 1.377 0 0 0-1.374-1.375H3.625Z"></path>
                     </svg>
-                    <h1>69</h1>
+                    <h1>{post.comments}</h1>
                   </button>
 
                   <button className="flex flex-row gap-1 items-center bg-zinc-200 p-1 rounded">
