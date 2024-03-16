@@ -16,11 +16,8 @@
 if (isset ($_COOKIE['PHPSESSID'])) {
     $sessionID = $_COOKIE['PHPSESSID'];
     session_start();
-    if ($sessionID === session_id()) {
-        echo "Session is valid!";
-    } else {
+    if ($sessionID !== session_id())
         sendResponse("failed", "You are not authenticated", 403);
-    }
 } else {
     sendResponse("failed", "session id not found", 403);
 }

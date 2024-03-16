@@ -5,6 +5,7 @@ $port = "5432";
 $dbname = "postgres";
 $user = "postgres.rafhblqrgvjzlxhigvlt";
 $password = "owgzvI0A9cLb4XDL";
+
 try {
     $dsn = "pgsql:host=$host;port=$port;dbname=$dbname;user=$user;password=$password";
     $db = new PDO($dsn);
@@ -12,12 +13,17 @@ try {
     $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
+    // $localTimezone = date_default_timezone_get();
+    // $setTZQuery = "SET TIME ZONE '" . $localTimezone . "'";
+    // $result = $db->prepare($setTZQuery)->execute();
+
     $createUserAccountTable = "CREATE TABLE IF NOT EXISTS tblUserAccount(
         id SERIAL PRIMARY KEY,
         username VARCHAR(255) NOT NULL,
         password VARCHAR(255) NOT NULL,
         email VARCHAR(50) NOT NULL,
-        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        createdAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMPTZ,
         CONSTRAINT unique_username UNIQUE (username),
         CONSTRAINT password_length CHECK (LENGTH(password) >= 4)
     )";
@@ -41,22 +47,70 @@ try {
         lastName VARCHAR(50),
         gender gender,
         birthdate DATE,
-        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updatedAt TIMESTAMP,
+        createdAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMPTZ,
         CONSTRAINT unique_accountId UNIQUE (accountId),
         FOREIGN KEY (accountId) REFERENCES tblUserAccount(id) ON DELETE CASCADE
     )";
 
     $db->prepare($createUserProfileTable)->execute();
 
+
+    $db->prepare("
+    DO $$ 
+    BEGIN 
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'visibility_type') THEN
+            CREATE TYPE visibility_type AS ENUM ('public', 'restricted', 'private');
+        END IF;
+    END $$;
+    ")->execute();
+
+
+    //todo create separate table for multi value community rules
+    $createCommunity = "CREATE TABLE IF NOT EXISTS tblCommunity(
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(20) NOT NULL,
+        visibility visibility_type NOT NULL,
+        ownerId int,
+        about varchar(255),
+        createdAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMPTZ,
+        CONSTRAINT unique_community_name UNIQUE (name),
+        FOREIGN KEY (ownerId) REFERENCES tblUserProfile(accountId)
+    )";
+    $db->prepare($createCommunity)->execute();
+
+    $db->prepare("
+    DO $$ 
+    BEGIN 
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'community_user_privilege') THEN
+            CREATE TYPE community_user_privilege AS ENUM ('member', 'moderator');
+        END IF;
+    END $$;
+    ")->execute();
+
+    $createCommunityMemberTable = "CREATE TABLE IF NOT EXISTS tblCommunityMember(
+        id SERIAL PRIMARY KEY,
+        memberId int,
+        communityId int,
+        privilege community_user_privilege NOT NULL,
+        createdAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMPTZ,
+        FOREIGN KEY (communityId) REFERENCES tblCommunity(id),
+        FOREIGN KEY (memberId) REFERENCES tblUserProfile(accountId)
+    )";
+    $db->prepare($createCommunityMemberTable)->execute();
+
     $createPostTable = "CREATE TABLE IF NOT EXISTS tblPost(
         id SERIAL PRIMARY KEY,
         authorId INT,
+        communityId int,
         title VARCHAR(50) NOT NULL,
         content TEXT NOT NULL,
-        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updatedAt TIMESTAMP,
-        FOREIGN KEY (authorId) REFERENCES tblUserProfile(accountid) ON DELETE CASCADE
+        createdAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMPTZ,
+        FOREIGN KEY (authorId) REFERENCES tblUserProfile(accountid) ON DELETE CASCADE,
+        FOREIGN KEY (communityId) REFERENCES tblCommunity(id) ON DELETE CASCADE
     )";
 
     $db->prepare($createPostTable)->execute();
@@ -76,6 +130,8 @@ try {
         postId INT,
         userId INT,
         vote vote,
+        createdAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMPTZ,
         CONSTRAINT unique_user_vote UNIQUE (postId, userId),
         FOREIGN KEY (postId) REFERENCES tblPost(id) ON DELETE CASCADE,
         FOREIGN KEY (userId) REFERENCES tblUserProfile(accountId) ON DELETE CASCADE
@@ -89,9 +145,9 @@ try {
         postId INT,
         parentComment INT, 
         content VARCHAR(512),
-        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updatedAt TIMESTAMP,
-        FOREIGN KEY (userId) REFERENCES tblUserProfile(id) ON DELETE CASCADE,
+        createdAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMPTZ,
+        FOREIGN KEY (userId) REFERENCES tblUserProfile(accountId) ON DELETE CASCADE,
         FOREIGN KEY (postId) REFERENCES tblPost(id) ON DELETE CASCADE,
         FOREIGN KEY (parentcomment) references tblcomment(id) on delete cascade
     )";
@@ -103,16 +159,14 @@ try {
         senderId INT,
         receiverId INT,
         message TEXT,
-        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updatedAt TIMESTAMP,
+        createdAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMPTZ,
         FOREIGN KEY (senderId) REFERENCES tblUserProfile(id),
         FOREIGN KEY (senderId) REFERENCES tblUserProfile(id)
     )";
 
     $db->prepare($createMessageTable)->execute();
-
     header("HTTP/1.1 200 OK");
 } catch (PDOException $e) {
     echo "Connection failed: " . $e->getMessage();
 }
-?>
