@@ -24,6 +24,7 @@ const Dashboard: React.FC = () => {
       try {
         const data = await getPosts(page);
         if (page === 1) {
+          console.log(data);
           setPosts(data);
         } else {
           setPosts((prevPosts) => [...prevPosts, ...data]);
@@ -93,11 +94,11 @@ const Dashboard: React.FC = () => {
             {posts.map((post) => (
               <div
                 key={post.id}
-                className="border border-black rounded p-5 w-[500px]"
+                className="border border-black rounded p-5 w-[500px] bg-gray-50"
               >
                 <div className="flex text-xs flex-row gap-2 items-center">
                   <div className="rounded rounded-full w-[25px] h-[25px] bg-gray-200"></div>
-                  <p className="font-bold">r/{post.community}</p>
+                  <p className="font-bold">r/{post.community.name}</p>
                   <p className="">{timeAgo(post.createdat)}</p>
                 </div>
                 <div className="text-left">
@@ -121,7 +122,9 @@ const Dashboard: React.FC = () => {
                     </button>
 
                     <div className="flex flex-row items-center">
-                      <h1 className="text-xs font-semibold">{post.upvotes}</h1>
+                      <h1 className="text-xs font-semibold">
+                        {post.upvote_count}
+                      </h1>
                     </div>
 
                     <button className="flex flex-row gap-1 items-center">
@@ -151,7 +154,7 @@ const Dashboard: React.FC = () => {
                     >
                       <path d="M7.725 19.872a.718.718 0 0 1-.607-.328.725.725 0 0 1-.118-.397V16H3.625A2.63 2.63 0 0 1 1 13.375v-9.75A2.629 2.629 0 0 1 3.625 1h12.75A2.63 2.63 0 0 1 19 3.625v9.75A2.63 2.63 0 0 1 16.375 16h-4.161l-4 3.681a.725.725 0 0 1-.489.191ZM3.625 2.25A1.377 1.377 0 0 0 2.25 3.625v9.75a1.377 1.377 0 0 0 1.375 1.375h4a.625.625 0 0 1 .625.625v2.575l3.3-3.035a.628.628 0 0 1 .424-.165h4.4a1.377 1.377 0 0 0 1.375-1.375v-9.75a1.377 1.377 0 0 0-1.374-1.375H3.625Z"></path>
                     </svg>
-                    <h1>{post.comments}</h1>
+                    <h1>{post.comment_count}</h1>
                   </button>
 
                   <button className="flex flex-row gap-1 items-center bg-zinc-200 p-1 rounded">

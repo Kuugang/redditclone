@@ -1,6 +1,6 @@
 import React from "react";
 import Spinner from "./Spinner.tsx";
-import { useNavigate } from "react-router-dom";
+import { json, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 interface LoginProps {
   handleCloseDialog: (ref: React.RefObject<HTMLDialogElement>) => void;
@@ -30,16 +30,19 @@ const Login: React.FC<LoginProps> = ({
         credentials: "include",
       });
 
+      let jsonData = await data.json();
       if (data.status == 200) {
         setIsLoading(false);
         toast("Logged in successfully");
-        data = await data.json();
         setIsLoggedIn(true);
         handleCloseDialog(loginRef);
         e.target.reset();
+      } else {
+        throw new Error(jsonData.message);
       }
     } catch (e) {
       toast.error(e.message);
+      setIsLoading(false);
     }
   }
 

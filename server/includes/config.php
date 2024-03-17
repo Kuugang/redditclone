@@ -25,6 +25,7 @@ try {
         createdAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
         updatedAt TIMESTAMPTZ,
         CONSTRAINT unique_username UNIQUE (username),
+        CONSTRAINT unique_email UNIQUE (email),
         CONSTRAINT password_length CHECK (LENGTH(password) >= 4)
     )";
 
