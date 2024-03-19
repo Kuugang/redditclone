@@ -594,7 +594,6 @@ class User
                 $privilege = "moderator";
                 $stmt->bindParam(":privilege", $privilege);
                 $stmt->execute();
-
                 sendResponse("success", "Created community succesfully", 200);
             } else {
                 sendResponse("failed", "Failed to create community", 200);

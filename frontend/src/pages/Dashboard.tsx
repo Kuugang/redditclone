@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getPosts } from "../utils/helper";
 import { MyContext } from "../utils/Context";
+import LeftBar from "../components/LeftBar.tsx";
 
 interface Post {
   id: number;
@@ -87,7 +88,8 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <>
+    <div className="flex flex-row gap-5">
+      <LeftBar></LeftBar>
       {posts && posts.length > 0 ? (
         <div className="flex flex-col w-[100v] items-center m-6">
           <div className="flex flex-col gap-5">
@@ -182,7 +184,7 @@ const Dashboard: React.FC = () => {
           <h1>Getting Posts</h1>
         </>
       )}
-    </>
+    </div>
   );
 };
 
