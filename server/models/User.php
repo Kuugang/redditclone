@@ -7,6 +7,8 @@ class User
     private $tblUserAccount = "tblUserAccount";
     private $tblUserProfile = "tblUserProfile";
     private $tblComment = "tblComment";
+
+
     private $user;
 
     public function __construct($id, $username, $user)
@@ -35,26 +37,28 @@ class User
         $gender = $_POST['gender'];
         $birthDate = $_POST['birthDate'];
         global $db;
+
         try {
-            $query = 'INSERT INTO tblUserAccount (username, password, email) VALUES (:username, :password, :email)';
+            $query = 'INSERT INTO tblUserAccount (username, password, email) VALUES (:username, :password, :email) RETURNING * ';
             $stmt = $db->prepare($query);
             $password = password_hash($password, PASSWORD_DEFAULT);
             $stmt->bindParam(':username', $username);
             $stmt->bindParam(':password', $password);
             $stmt->bindParam(':email', $email);
-            $resultId = null;
+            $insertedRow = null;
+
             try {
                 $stmt->execute();
-                $resultId = $db->lastInsertId();
+                $insertedRow = $stmt->fetch(PDO::FETCH_ASSOC);
             } catch (PDOException $e) {
                 if ($e->getCode() == 23505) {
                     sendResponse("failed", "Username already taken", 409);
                 }
                 sendResponse("failed", "Failed to create account", 500);
             }
-            $query = 'INSERT INTO tblUserProfile (accountId, firstName, lastName, gender, birthdate) VALUES (:accountId, :firstName, :lastName, :gender, :birthdate)';
+            $query = 'INSERT INTO tblUserProfile (id, firstName, lastName, gender, birthdate) VALUES (:id, :firstName, :lastName, :gender, :birthdate)';
             $stmt = $db->prepare($query);
-            $stmt->bindParam(':accountId', $resultId);
+            $stmt->bindParam(':id', $insertedRow['id']);
             $stmt->bindParam(':firstName', $firstName);
             $stmt->bindParam(':lastName', $lastName);
             $stmt->bindParam(':gender', $gender);
@@ -73,9 +77,13 @@ class User
 
     public static function login()
     {
+        $requiredInputs = ["username", "password"];
 
-        if (!isset ($_POST["username"]) || !isset ($_POST['password']))
-            sendResponse("error", "Please provide all inputs", 400);
+        foreach ($requiredInputs as $input) {
+            if (!isset ($_POST[$input])) {
+                sendResponse("error", ucfirst($input) . " is missing", 400);
+            }
+        }
 
         $username = $_POST['username'];
         $password = $_POST['password'];

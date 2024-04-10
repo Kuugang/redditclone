@@ -3,9 +3,9 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 
-import Dashboard from "./pages/Dashboard.tsx";
-import Submit from "./pages/Submit.tsx";
-import Navbar from "./components/Navbar.tsx";
+import Dashboard from "./pages/Dashboard.jsx";
+import Submit from "./pages/Submit.jsx";
+import Navbar from "./components/Navbar.jsx";
 import './App.css';
 
 function App() {
