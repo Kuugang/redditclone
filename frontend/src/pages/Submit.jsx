@@ -29,7 +29,7 @@ const Submit = () => {
 
       if (response.status === 200) {
         let data = await response.json();
-        setPosts((prevPosts) => [...prevPosts, data.newPost]);
+        setPosts((posts) => [...posts, data.newPost]);
         setIsLoading(false);
         toast("Post created successfully");
         navigate("/");

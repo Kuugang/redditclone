@@ -595,27 +595,33 @@ class User
 
         global $db;
         try {
-            $query = "INSERT INTO tblCommunity (name, visibility, ownerId) VALUES (:name, :visibility, :ownerId)";
+            $query = "INSERT INTO tblCommunity (name, visibility, ownerId) VALUES (:name, :visibility, :ownerId) RETURNING *";
             $stmt = $db->prepare($query);
             $stmt->bindParam(":name", $name);
             $stmt->bindParam(":visibility", $visibility);
             $stmt->bindParam(":ownerId", $this->id);
 
             if ($stmt->execute()) {
-                $resultId = $db->lastInsertId();
+                $insertedRow = $stmt->fetch(PDO::FETCH_ASSOC);
                 $query = 'INSERT INTO tblCommunityMember(userId, communityId, privilege) VALUES (:userId, :communityId, :privilege)';
                 $stmt = $db->prepare($query);
                 $stmt->bindParam(":userId", $this->id);
-                $stmt->bindParam(":communityId", $resultId);
+                $stmt->bindParam(":communityId", $insertedRow['id']);
                 $privilege = "administrator";
                 $stmt->bindParam(":privilege", $privilege);
                 $stmt->execute();
-                sendResponse("success", "Created community succesfully", 200);
+                sendResponse(true, "Created community succesfully", 200 , array('data'=>array('newCommunity'=>$insertedRow)));
             } else {
-                sendResponse("failed", "Failed to create community", 200);
+                sendResponse(false, "Failed to create community", 200);
             }
+
         } catch (PDOException $e) {
-            sendResponse("failed", $e->getMessage(), 500);
+            $code = $e->getCode();
+            if($code == 23505)
+                sendResponse(false, "Community already exists", 500);
+
+
+            sendResponse(false, $e->getMessage(), 500);
         }
     }
 
@@ -637,7 +643,7 @@ class User
             $stmt->execute();
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            sendResponse("success", "Successfully fetched communities", 200, array("communities" => $result));
+            sendResponse("success", "Successfully fetched communities", 200, array("data" => array("communities" => $result)));
         } catch (PDOException $e) {
             sendResponse("failed", $e->getMessage(), 500);
         }

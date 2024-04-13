@@ -65,7 +65,7 @@ try {
     ")->execute();
 
     $createCommunity = "CREATE TABLE IF NOT EXISTS tblCommunity(
-       id SERIAL PRIMARY KEY,
+       id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
        name VARCHAR(20) NOT NULL,
        visibility visibility_type NOT NULL,
        ownerId UUID,
@@ -87,21 +87,21 @@ try {
     ")->execute();
 
     $createCommunityMemberTable = "CREATE TABLE IF NOT EXISTS tblCommunityMember(
-       id SERIAL PRIMARY KEY,
-       userId UUID,
-       communityId int,
+       id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+       userId UUID NOT NULL,
+       communityId UUID NOT NULL,
        privilege community_user_privilege NOT NULL,
        createdAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
        updatedAt TIMESTAMPTZ,
-       FOREIGN KEY (communityId) REFERENCES tblCommunity(id),
-       FOREIGN KEY (userId) REFERENCES tblUserProfile(id)
+       FOREIGN KEY (communityId) REFERENCES tblCommunity(id) ON DELETE CASCADE,
+       FOREIGN KEY (userId) REFERENCES tblUserProfile(id)ON DELETE CASCADE
     )";
     $db->prepare($createCommunityMemberTable)->execute();
 
     $createPostTable = "CREATE TABLE IF NOT EXISTS tblPost(
-       id SERIAL PRIMARY KEY,
-       authorId UUID,
-       communityId int,
+       id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+       authorId UUID NOT NULL,
+       communityId UUID NOT NULL,
        title VARCHAR(50) NOT NULL,
        content TEXT NOT NULL,
        createdAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
@@ -136,20 +136,20 @@ try {
 //
 //    $db->prepare($createVoteTable)->execute();
 //
-//    $createCommentTable = "CREATE TABLE IF NOT EXISTS tblComment(
-//        id SERIAL PRIMARY KEY,
-//        userId INT,
-//        postId INT,
-//        parentComment INT,
-//        content VARCHAR(512),
-//        createdAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-//        updatedAt TIMESTAMPTZ,
-//        FOREIGN KEY (userId) REFERENCES tblUserProfile(accountId) ON DELETE CASCADE,
-//        FOREIGN KEY (postId) REFERENCES tblPost(id) ON DELETE CASCADE,
-//        FOREIGN KEY (parentcomment) references tblcomment(id) on delete cascade
-//    )";
-//
-//    $db->prepare($createCommentTable)->execute();
+    $createCommentTable = "CREATE TABLE IF NOT EXISTS tblComment(
+       id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        userId UUID NOT NULL,
+        postId UUID NOT NULL,
+        parentComment UUID,
+        content VARCHAR(512) NOT NULL,
+        createdAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMPTZ,
+        FOREIGN KEY (userId) REFERENCES tblUserProfile(id) ON DELETE CASCADE,
+        FOREIGN KEY (postId) REFERENCES tblPost(id) ON DELETE CASCADE,
+        FOREIGN KEY (parentcomment) references tblcomment(id) on delete cascade
+    )";
+
+    $db->prepare($createCommentTable)->execute();
 //
 //    $createMessageTable = "CREATE TABLE IF NOT EXISTS tblMessage(
 //        id SERIAL PRIMARY KEY,
