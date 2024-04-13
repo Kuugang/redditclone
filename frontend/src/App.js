@@ -20,7 +20,6 @@ function App() {
                     <Route exact path="/" element={<Dashboard></Dashboard>}></Route>
                     <Route exact path="/submit" element={<Submit></Submit>}></Route>
                     <Route exact path="/submit" element={<Submit></Submit>}></Route>
-
                 </Routes>
             </Router>
         </div>
