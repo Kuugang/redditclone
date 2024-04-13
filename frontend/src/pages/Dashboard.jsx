@@ -17,6 +17,7 @@ const Dashboard = () => {
             try {
                 const data = await getPosts(page);
                 if (page === 1) {
+
                     setPosts(data);
                 } else {
                     setPosts((prevPosts) => [...prevPosts, ...data]);

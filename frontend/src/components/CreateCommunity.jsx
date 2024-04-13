@@ -4,7 +4,6 @@ import Spinner from "./Spinner";
 import { MyContext } from "../utils/Context";
 import { closeModal, handleDialogOutsideClick } from "../utils/functions";
 import Close from "../icons/Close";
-import { axiosReq } from "../utils/axios";
 
 const CreateCommunity = ({ createCommunityRef, communities, setCommunities }) => {
     const { isLoading, setIsLoading } = useContext(MyContext);

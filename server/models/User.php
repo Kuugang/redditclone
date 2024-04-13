@@ -279,68 +279,67 @@ class User
         }
 
 
-        if (isset($_GET['filter'])) {
-            $filter = '%' . $_GET['filter'] . '%';
+        // if (isset($_GET['filter'])) {
+        //     $filter = '%' . $_GET['filter'] . '%';
 
-            try {
-                $query = "SELECT p.*, 
-                       COALESCE(upvotes.upvote_count, 0) as upvote_count,
-                       COALESCE(downvotes.downvote_count, 0) as downvote_count,
-                       COALESCE(comments.comment_count, 0) as comment_count,
-                       u.username as authorusername, 
-                       c.name as communityname
-                FROM tblPost p 
-                LEFT JOIN tblUserAccount u ON p.authorid = u.id 
-                LEFT JOIN tblCommunity c ON p.communityid = c.id 
-                LEFT JOIN (
-                    SELECT postid, COUNT(*) as upvote_count 
-                    FROM tblVote 
-                    WHERE vote = 'upvote' 
-                    GROUP BY postid
-                ) as upvotes ON upvotes.postid = p.id
-                LEFT JOIN (
-                    SELECT postid, COUNT(*) as downvote_count 
-                    FROM tblVote 
-                    WHERE vote = 'downvote' 
-                    GROUP BY postid
-                ) as downvotes ON downvotes.postid = p.id
-                LEFT JOIN (
-                    SELECT postid, COUNT(*) as comment_count 
-                    FROM tblComment 
-                    GROUP BY postid
-                ) as comments ON comments.postid = p.id
-                WHERE p.content LIKE :contentFilter OR p.title LIKE :titleFilter
-                ORDER BY p.id DESC";
+        //     try {
+        //         $query = "SELECT p.*, 
+        //                COALESCE(upvotes.upvote_count, 0) as upvote_count,
+        //                COALESCE(downvotes.downvote_count, 0) as downvote_count,
+        //                COALESCE(comments.comment_count, 0) as comment_count,
+        //                u.username as authorusername, 
+        //                c.name as communityname
+        //         FROM tblPost p 
+        //         LEFT JOIN tblUserAccount u ON p.authorid = u.id 
+        //         LEFT JOIN tblCommunity c ON p.communityid = c.id 
+        //         LEFT JOIN (
+        //             SELECT postid, COUNT(*) as upvote_count 
+        //             FROM tblVote 
+        //             WHERE vote = 'upvote' 
+        //             GROUP BY postid
+        //         ) as upvotes ON upvotes.postid = p.id
+        //         LEFT JOIN (
+        //             SELECT postid, COUNT(*) as downvote_count 
+        //             FROM tblVote 
+        //             WHERE vote = 'downvote' 
+        //             GROUP BY postid
+        //         ) as downvotes ON downvotes.postid = p.id
+        //         LEFT JOIN (
+        //             SELECT postid, COUNT(*) as comment_count 
+        //             FROM tblComment 
+        //             GROUP BY postid
+        //         ) as comments ON comments.postid = p.id
+        //         WHERE p.content LIKE :contentFilter OR p.title LIKE :titleFilter
+        //         ORDER BY p.id DESC";
 
-                $stmt = $db->prepare($query);
-                $stmt->bindParam(":contentFilter", $filter, PDO::PARAM_STR);
-                $stmt->bindParam(":titleFilter", $filter, PDO::PARAM_STR);
-                $stmt->execute();
-                $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        //         $stmt = $db->prepare($query);
+        //         $stmt->bindParam(":contentFilter", $filter, PDO::PARAM_STR);
+        //         $stmt->bindParam(":titleFilter", $filter, PDO::PARAM_STR);
+        //         $stmt->execute();
+        //         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-                foreach ($results as &$result) {
-                    $result['author'] = array(
-                        'id' => $result['authorid'],
-                        'username' => $result['authorusername'],
-                    );
-                    $result['community'] = array(
-                        'id' => $result['communityid'],
-                        'name' => $result['communityname']
-                    );
+        //         foreach ($results as &$result) {
+        //             $result['author'] = array(
+        //                 'id' => $result['authorid'],
+        //                 'username' => $result['authorusername'],
+        //             );
+        //             $result['community'] = array(
+        //                 'id' => $result['communityid'],
+        //                 'name' => $result['communityname']
+        //             );
 
-                    unset($result['authorid'], $result['authorusername'], $result['communityid'], $result['communityname']);
-                }
+        //             unset($result['authorid'], $result['authorusername'], $result['communityid'], $result['communityname']);
+        //         }
 
-
-                if ($results) {
-                    sendResponse("success", "Posts retrieved successfully", 200, array("posts" => $results));
-                } else {
-                    sendResponse("failed", "No posts found", 404);
-                }
-            } catch (PDOException $e) {
-                sendResponse("failed", $e->getMessage(), 500);
-            }
-        }
+        //         if ($results) {
+        //             sendResponse(true, "Posts retrieved successfully", 200, array("posts" => $results));
+        //         } else {
+        //             sendResponse(false, "No posts found", 404);
+        //         }
+        //     } catch (PDOException $e) {
+        //         sendResponse("failed", $e->getMessage(), 500);
+        //     }
+        // }
     }
 
     public function updatePost()
