@@ -16,9 +16,11 @@ function App() {
                 <ToastContainer />
 
                 <Routes>
+                    <Route>exact path = "" </Route>
                     <Route exact path="/" element={<Dashboard></Dashboard>}></Route>
                     <Route exact path="/submit" element={<Submit></Submit>}></Route>
                     <Route exact path="/submit" element={<Submit></Submit>}></Route>
+
                 </Routes>
             </Router>
         </div>
