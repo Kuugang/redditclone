@@ -583,7 +583,7 @@ class User
     }
     public function createCommunity()
     {
-        $requiredInputs = ['name', 'visibility', 'about'];
+        $requiredInputs = ['name', 'visibility'];
 
         foreach ($requiredInputs as $input) {
             if (!isset($_POST[$input])) {
@@ -592,16 +592,14 @@ class User
         }
         $name = $_POST['name'];
         $visibility = $_POST['visibility'];
-        $about = $_POST['about'];
 
         global $db;
         try {
-            $query = "INSERT INTO tblCommunity (name, visibility, ownerId, about) VALUES (:name, :visibility, :ownerId, :about)";
+            $query = "INSERT INTO tblCommunity (name, visibility, ownerId) VALUES (:name, :visibility, :ownerId)";
             $stmt = $db->prepare($query);
             $stmt->bindParam(":name", $name);
             $stmt->bindParam(":visibility", $visibility);
             $stmt->bindParam(":ownerId", $this->id);
-            $stmt->bindParam(":about", $this->id);
 
             if ($stmt->execute()) {
                 $resultId = $db->lastInsertId();
