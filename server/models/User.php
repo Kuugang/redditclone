@@ -24,7 +24,7 @@ class User
         $requiredInputs = ["username", "password", "email", "firstName", "lastName", "gender", "birthDate"];
 
         foreach ($requiredInputs as $input) {
-            if (!isset ($_POST[$input])) {
+            if (!isset($_POST[$input])) {
                 sendResponse("error", ucfirst($input) . " is missing", 400);
             }
         }
@@ -80,7 +80,7 @@ class User
         $requiredInputs = ["username", "password"];
 
         foreach ($requiredInputs as $input) {
-            if (!isset ($_POST[$input])) {
+            if (!isset($_POST[$input])) {
                 sendResponse("error", ucfirst($input) . " is missing", 400);
             }
         }
@@ -121,7 +121,7 @@ class User
         $requiredInputs = ["title", "content", "communityId"];
 
         foreach ($requiredInputs as $input) {
-            if (!isset ($_POST[$input])) {
+            if (!isset($_POST[$input])) {
                 sendResponse("error", ucfirst($input) . " is missing", 400);
             }
         }
@@ -165,7 +165,7 @@ class User
     {
         global $db;
 
-        if (isset ($_GET['id'])) {
+        if (isset($_GET['id'])) {
             $id = $_GET["id"];
             try {
                 $query = "SELECT p.*, 
@@ -222,7 +222,7 @@ class User
             }
         }
 
-        if (isset ($_GET['page'])) {
+        if (isset($_GET['page'])) {
             $page = $_GET["page"];
             $pageSize = 5;
             $offset = ($page - 1) * $pageSize;
@@ -270,7 +270,7 @@ class User
             }
         }
 
-        if (isset ($_GET['filter'])) {
+        if (isset($_GET['filter'])) {
             $filter = '%' . $_GET['filter'] . '%';
 
             try {
@@ -336,13 +336,13 @@ class User
 
     public function updatePost()
     {
-        if (!isset ($_GET['id']))
+        if (!isset($_GET['id']))
             sendResponse("failed", "Please provide the post's id to update", 200);
 
         global $db;
         $id = $_GET['id'];
-        $title = isset ($_POST['title']) ? $_POST['title'] : null;
-        $body = isset ($_POST['body']) ? $_POST['body'] : null;
+        $title = isset($_POST['title']) ? $_POST['title'] : null;
+        $body = isset($_POST['body']) ? $_POST['body'] : null;
 
         try {
             $query = 'UPDATE tblPost SET ';
@@ -384,7 +384,7 @@ class User
 
     public function deletePost()
     {
-        if (!isset ($_GET['id']))
+        if (!isset($_GET['id']))
             sendResponse("failed", "Please provide the post's id to delete", 400);
 
         global $db;
@@ -417,7 +417,7 @@ class User
         $requiredInputs = ["postId", "vote"];
 
         foreach ($requiredInputs as $input) {
-            if (!isset ($_POST[$input])) {
+            if (!isset($_POST[$input])) {
                 sendResponse("error", ucfirst($input) . " is missing", 400);
             }
         }
@@ -474,7 +474,7 @@ class User
             parse_str($_SERVER['QUERY_STRING'], $query_params);
         }
 
-        if (!isset ($query_params['postId']))
+        if (!isset($query_params['postId']))
             sendResponse("error", "Post ID is missing", 400);
 
         global $db;
@@ -500,7 +500,7 @@ class User
         $requiredInputs = ["postId", "content"];
 
         foreach ($requiredInputs as $input) {
-            if (!isset ($_POST[$input])) {
+            if (!isset($_POST[$input])) {
                 sendResponse("error", ucfirst($input) . " is missing", 400);
             }
         }
@@ -512,7 +512,7 @@ class User
 
         global $db;
 
-        if (!isset ($_POST['parentComment'])) {
+        if (!isset($_POST['parentComment'])) {
             try {
                 $query = "INSERT INTO tblComment (userId, postId, content) VALUES (:userId, :postId, :content)";
                 $stmt = $db->prepare($query);
@@ -556,7 +556,7 @@ class User
             parse_str($_SERVER['QUERY_STRING'], $query_params);
         }
 
-        if (!isset ($query_params['commentId']))
+        if (!isset($query_params['commentId']))
             sendResponse("error", "Comment ID is missing", 400);
 
         $commentId = $query_params['commentId'];
@@ -583,30 +583,33 @@ class User
     }
     public function createCommunity()
     {
-        $requiredInputs = ["name", "visibility"];
+        $requiredInputs = ['name', 'visibility', 'about'];
+
         foreach ($requiredInputs as $input) {
-            if (!isset ($_POST[$input])) {
+            if (!isset($_POST[$input])) {
                 sendResponse("error", ucfirst($input) . " is missing", 400);
             }
         }
         $name = $_POST['name'];
         $visibility = $_POST['visibility'];
+        $about = $_POST['about'];
 
         global $db;
         try {
-            $query = "INSERT INTO tblCommunity (name, visibility, ownerId) VALUES (:name, :visibility, :ownerId)";
+            $query = "INSERT INTO tblCommunity (name, visibility, ownerId, about) VALUES (:name, :visibility, :ownerId, :about)";
             $stmt = $db->prepare($query);
             $stmt->bindParam(":name", $name);
             $stmt->bindParam(":visibility", $visibility);
             $stmt->bindParam(":ownerId", $this->id);
+            $stmt->bindParam(":about", $this->id);
+
             if ($stmt->execute()) {
                 $resultId = $db->lastInsertId();
-                $query = 'INSERT INTO tblCommunityMember(memberId, communityId, privilege) VALUES (:memberId, :communityId, :privilege)';
+                $query = 'INSERT INTO tblCommunityMember(userId, communityId, privilege) VALUES (:userId, :communityId, :privilege)';
                 $stmt = $db->prepare($query);
-                $stmt->bindParam(":memberId", $this->id);
+                $stmt->bindParam(":userId", $this->id);
                 $stmt->bindParam(":communityId", $resultId);
-                $stmt->bindParam(":communityId", $resultId);
-                $privilege = "moderator";
+                $privilege = "administrator";
                 $stmt->bindParam(":privilege", $privilege);
                 $stmt->execute();
                 sendResponse("success", "Created community succesfully", 200);
@@ -618,7 +621,8 @@ class User
         }
     }
 
-    public function readCommunity(){
+    public function readCommunity()
+    {
         // $requiredInputs = ["name", "visibility"];
         // foreach ($requiredInputs as $input) {
         //     if (!isset ($_POST[$input])) {
@@ -638,6 +642,6 @@ class User
             sendResponse("success", "Successfully fetched communities", 200, array("communities" => $result));
         } catch (PDOException $e) {
             sendResponse("failed", $e->getMessage(), 500);
-        }       
+        }
     }
 }

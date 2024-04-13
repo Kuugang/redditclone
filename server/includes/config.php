@@ -42,7 +42,7 @@ try {
     ")->execute();
 
     $createUserProfileTable = "CREATE TABLE IF NOT EXISTS tblUserProfile(
-       id UUID PRIMARY KEY,
+        id UUID PRIMARY KEY,
         firstName VARCHAR(50),
         lastName VARCHAR(50),
         gender gender,
@@ -53,67 +53,65 @@ try {
     )";
 
     $db->prepare($createUserProfileTable)->execute();
-//
-//
-//    $db->prepare("
-//    DO $$
-//    BEGIN
-//        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'visibility_type') THEN
-//            CREATE TYPE visibility_type AS ENUM ('public', 'restricted', 'private');
-//        END IF;
-//    END $$;
-//    ")->execute();
-//
-//
-//    //todo create separate table for multi value community rules
-//    $createCommunity = "CREATE TABLE IF NOT EXISTS tblCommunity(
-//        id SERIAL PRIMARY KEY,
-//        name VARCHAR(20) NOT NULL,
-//        visibility visibility_type NOT NULL,
-//        ownerId int,
-//        about varchar(255),
-//        createdAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-//        updatedAt TIMESTAMPTZ,
-//        CONSTRAINT unique_community_name UNIQUE (name),
-//        FOREIGN KEY (ownerId) REFERENCES tblUserProfile(accountId)
-//    )";
-//    $db->prepare($createCommunity)->execute();
-//
-//    $db->prepare("
-//    DO $$
-//    BEGIN
-//        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'community_user_privilege') THEN
-//            CREATE TYPE community_user_privilege AS ENUM ('member', 'moderator');
-//        END IF;
-//    END $$;
-//    ")->execute();
-//
-//    $createCommunityMemberTable = "CREATE TABLE IF NOT EXISTS tblCommunityMember(
-//        id SERIAL PRIMARY KEY,
-//        memberId int,
-//        communityId int,
-//        privilege community_user_privilege NOT NULL,
-//        createdAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-//        updatedAt TIMESTAMPTZ,
-//        FOREIGN KEY (communityId) REFERENCES tblCommunity(id),
-//        FOREIGN KEY (memberId) REFERENCES tblUserProfile(accountId)
-//    )";
-//    $db->prepare($createCommunityMemberTable)->execute();
-//
-//    $createPostTable = "CREATE TABLE IF NOT EXISTS tblPost(
-//        id SERIAL PRIMARY KEY,
-//        authorId INT,
-//        communityId int,
-//        title VARCHAR(50) NOT NULL,
-//        content TEXT NOT NULL,
-//        createdAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-//        updatedAt TIMESTAMPTZ,
-//        FOREIGN KEY (authorId) REFERENCES tblUserProfile(accountid) ON DELETE CASCADE,
-//        FOREIGN KEY (communityId) REFERENCES tblCommunity(id) ON DELETE CASCADE
-//    )";
-//
-//    $db->prepare($createPostTable)->execute();
-//
+
+    //create community visibility
+    $db->prepare("
+    DO $$
+    BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'visibility_type') THEN
+            CREATE TYPE visibility_type AS ENUM ('public', 'restricted', 'private');
+        END IF;
+    END $$;
+    ")->execute();
+
+    $createCommunity = "CREATE TABLE IF NOT EXISTS tblCommunity(
+       id SERIAL PRIMARY KEY,
+       name VARCHAR(20) NOT NULL,
+       visibility visibility_type NOT NULL,
+       ownerId UUID,
+       about varchar(255),
+       createdAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+       updatedAt TIMESTAMPTZ,
+       CONSTRAINT unique_community_name UNIQUE (name),
+       FOREIGN KEY (ownerId) REFERENCES tblUserProfile(id)
+   )";
+    $db->prepare($createCommunity)->execute();
+
+    $db->prepare("
+    DO $$
+    BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'community_user_privilege') THEN
+            CREATE TYPE community_user_privilege AS ENUM ('member', 'moderator', 'administrator');
+        END IF;
+    END $$;
+    ")->execute();
+
+    $createCommunityMemberTable = "CREATE TABLE IF NOT EXISTS tblCommunityMember(
+       id SERIAL PRIMARY KEY,
+       userId UUID,
+       communityId int,
+       privilege community_user_privilege NOT NULL,
+       createdAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+       updatedAt TIMESTAMPTZ,
+       FOREIGN KEY (communityId) REFERENCES tblCommunity(id),
+       FOREIGN KEY (userId) REFERENCES tblUserProfile(id)
+    )";
+    $db->prepare($createCommunityMemberTable)->execute();
+
+    $createPostTable = "CREATE TABLE IF NOT EXISTS tblPost(
+       id SERIAL PRIMARY KEY,
+       authorId UUID,
+       communityId int,
+       title VARCHAR(50) NOT NULL,
+       content TEXT NOT NULL,
+       createdAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+       updatedAt TIMESTAMPTZ,
+       FOREIGN KEY (authorId) REFERENCES tblUserProfile(id) ON DELETE CASCADE,
+       FOREIGN KEY (communityId) REFERENCES tblCommunity(id) ON DELETE CASCADE
+   )";
+
+    $db->prepare($createPostTable)->execute();
+    //
 //    //create enum type vote
 //    $db->prepare("
 //    DO $$
