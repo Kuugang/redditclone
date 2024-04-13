@@ -56,9 +56,10 @@ class User
                 }
                 sendResponse("failed", "Failed to create account", 500);
             }
-            $query = 'INSERT INTO tblUserProfile (id, firstName, lastName, gender, birthdate) VALUES (:id, :firstName, :lastName, :gender, :birthdate)';
+            $query = 'INSERT INTO tblUserProfile (id, username, firstName, lastName, gender, birthdate) VALUES (:id, :username, :firstName, :lastName, :gender, :birthdate)';
             $stmt = $db->prepare($query);
             $stmt->bindParam(':id', $insertedRow['id']);
+            $stmt->bindParam(':username', $username);
             $stmt->bindParam(':firstName', $firstName);
             $stmt->bindParam(':lastName', $lastName);
             $stmt->bindParam(':gender', $gender);
@@ -150,6 +151,15 @@ class User
                 $stmt->execute();
                 $result = $stmt->fetch(PDO::FETCH_ASSOC);
                 $insertedRow['community'] = $result;
+                unset($result['communityid']);
+
+                $query = "SELECT * FROM tblUserProfile WHERE id = :authorId";
+                $stmt = $db->prepare($query);
+                $stmt->bindParam(':authorId', $this->id);
+                $stmt->execute();
+                $result = $stmt->fetch(PDO::FETCH_ASSOC);
+                $insertedRow['author'] = $result;
+                unset($result['authorid']);
                 sendResponse("success", "Post created successfully", 200, array("newPost" => $insertedRow));
             }
         } catch (PDOException $e) {
@@ -165,16 +175,16 @@ class User
             $id = $_GET["id"];
             try {
                 $query = "SELECT p.*, 
-                         COUNT(CASE WHEN v.vote = 'upvote' THEN 1 END) AS upvote_count,
-                         COUNT(CASE WHEN v.vote = 'downvote' THEN 1 END) AS downvote_count,
-                         u.username AS authorusername,
-                         c.name AS communityname
+                        json_build('id', a.id,
+                                    'username', a.username,
+                                    'firstname', up.firstname,
+                                    'lastname', up.lastname)
                     FROM tblPost p
-                    LEFT JOIN tblVote v ON p.id = v.postid
+                    -- LEFT JOIN tblVote v ON p.id = v.postid
                     LEFT JOIN tblUserAccount u ON p.authorid = u.id
-                    LEFT JOIN tblCommunity c ON p.communityid = c.id
-                   WHERE p.id = :id
-                GROUP BY p.id, p.title, p.content, p.authorid, u.username, c.name";
+                    LEFT JOIN tblUserProfile up ON u.id = up.id
+                    -- LEFT JOIN tblCommunity c ON p.communityid = c.id
+                   WHERE p.id = :id";
 
                 $stmt = $db->prepare($query);
                 $stmt->bindParam(":id", $id);
@@ -225,39 +235,41 @@ class User
 
             try {
                 $query = "SELECT p.*, 
-                 (SELECT COUNT(*) FROM tblVote v WHERE v.postid = p.id AND v.vote = 'upvote') as upvote_count, 
-                 (SELECT COUNT(*) FROM tblVote v WHERE v.postid = p.id AND v.vote = 'downvote') as downvote_count, 
-                 (SELECT COUNT(*) FROM tblComment cm WHERE cm.postid = p.id) as comment_count, 
-
-                 u.username as authorusername, 
-                 c.name as communityname
-    
-                FROM tblPost p 
-                LEFT JOIN tblUserAccount u ON p.authorid = u.id 
-                LEFT JOIN tblCommunity c ON p.communityid = c.id 
-                ORDER BY p.id DESC 
-                LIMIT :pageSize OFFSET :offset";
+                    json_build_object('id', u.id,
+                                     'username', u.username,
+                                     'firstName', up.firstname,
+                                     'lastName', up.lastname,
+                                     'gender', up.gender,
+                                     'birthdate', up.birthdate,
+                                     'createdAt', up.createdAt,
+                                     'updatedAt', up.updatedAt) AS author,
+                    json_build_object('id', c.id,
+                                    'name', c.name,
+                                    'visibility', c.visibility) as community
+                    FROM tblPost p
+                    LEFT JOIN tblUserAccount u ON p.authorid = u.id
+                    LEFT JOIN tblUserProfile up ON p.authorid = up.id
+                    LEFT JOIN tblCommunity c ON p.communityid = c.id 
+                    ORDER BY p.createdAt DESC
+                    LIMIT :pageSize OFFSET :offset;";
 
                 $stmt = $db->prepare($query);
-                $stmt->bindParam(":pageSize", $pageSize, PDO::PARAM_INT);
-                $stmt->bindParam(":offset", $offset, PDO::PARAM_INT);
+                $stmt->bindParam(":pageSize", $pageSize);
+                $stmt->bindParam(":offset", $offset);
                 $stmt->execute();
                 $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-                foreach ($results as &$result) {
-                    $result['author'] = array(
-                        'id' => $result['authorid'],
-                        'username' => $result['authorusername']
-                    );
-                    $result['community'] = array(
-                        'id' => $result['communityid'],
-                        'name' => $result['communityname']
-                    );
-                    unset($result['authorid'], $result['authorusername'], $result['communityname'], $result['communityid']);
-                }
-
                 if ($results) {
-                    sendResponse("success", "Posts retrieved successfully", 200, array("posts" => $results));
+                    foreach ($results as &$post) {
+                        $post['author'] = json_decode($post['author'], true);
+                        $post['community'] = json_decode($post['community'], true);
+                        unset($post['authorid']);
+                        unset($post['communityid']);
+                    }
+
+                    unset($post);
+
+                    sendResponse("success", "Posts retrieved successfully", 200, array("data" => array("posts" => $results)));
                 } else {
                     sendResponse("failed", "Page not found", 404);
                 }
@@ -265,6 +277,7 @@ class User
                 sendResponse("failed", $e->getMessage(), 500);
             }
         }
+
 
         if (isset($_GET['filter'])) {
             $filter = '%' . $_GET['filter'] . '%';
@@ -606,14 +619,14 @@ class User
                 $privilege = "administrator";
                 $stmt->bindParam(":privilege", $privilege);
                 $stmt->execute();
-                sendResponse(true, "Created community succesfully", 200 , array('data'=>array('newCommunity'=>$insertedRow)));
+                sendResponse(true, "Created community succesfully", 200, array('data' => array('newCommunity' => $insertedRow)));
             } else {
                 sendResponse(false, "Failed to create community", 200);
             }
 
         } catch (PDOException $e) {
             $code = $e->getCode();
-            if($code == 23505)
+            if ($code == 23505)
                 sendResponse(false, "Community already exists", 500);
 
 

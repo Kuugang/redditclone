@@ -111,31 +111,7 @@ try {
    )";
 
     $db->prepare($createPostTable)->execute();
-    //
-//    //create enum type vote
-//    $db->prepare("
-//    DO $$
-//    BEGIN
-//        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'vote') THEN
-//            CREATE TYPE vote AS ENUM ('upvote', 'downvote');
-//        END IF;
-//    END $$;
-//    ")->execute();
-//
-//    $createVoteTable = "CREATE TABLE IF NOT EXISTS tblVote(
-//        id SERIAL PRIMARY KEY,
-//        postId INT,
-//        userId INT,
-//        vote vote,
-//        createdAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-//        updatedAt TIMESTAMPTZ,
-//        CONSTRAINT unique_user_vote UNIQUE (postId, userId),
-//        FOREIGN KEY (postId) REFERENCES tblPost(id) ON DELETE CASCADE,
-//        FOREIGN KEY (userId) REFERENCES tblUserProfile(accountId) ON DELETE CASCADE
-//    )";
-//
-//    $db->prepare($createVoteTable)->execute();
-//
+
     $createCommentTable = "CREATE TABLE IF NOT EXISTS tblComment(
        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
         userId UUID NOT NULL,
@@ -150,7 +126,33 @@ try {
     )";
 
     $db->prepare($createCommentTable)->execute();
-//
+
+
+    //create enum type vote
+    $db->prepare("
+       DO $$
+       BEGIN
+           IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'vote') THEN
+               CREATE TYPE vote AS ENUM ('upvote', 'downvote');
+           END IF;
+       END $$;
+    ")->execute();
+
+    $createVoteTable = "CREATE TABLE IF NOT EXISTS tblVote(
+       id SERIAL PRIMARY KEY,
+       postId UUID,
+       userId UUID,
+       vote vote,
+       createdAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+       updatedAt TIMESTAMPTZ,
+       CONSTRAINT unique_user_vote UNIQUE (postId, userId),
+       FOREIGN KEY (postId) REFERENCES tblPost(id) ON DELETE CASCADE,
+       FOREIGN KEY (userId) REFERENCES tblUserProfile(id) ON DELETE CASCADE
+   )";
+
+    $db->prepare($createVoteTable)->execute();
+
+    //
 //    $createMessageTable = "CREATE TABLE IF NOT EXISTS tblMessage(
 //        id SERIAL PRIMARY KEY,
 //        senderId INT,

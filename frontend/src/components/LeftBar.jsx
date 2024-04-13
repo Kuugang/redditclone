@@ -1,10 +1,12 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import CreateCommunity from "./CreateCommunity.jsx";
-import {openModal} from "../utils/functions";
+import { openModal } from "../utils/functions";
+import { MyContext } from "../utils/Context.jsx";
 
 function LeftBar() {
-    const [communities, setCommunities] = useState([]);
+    const { communities, setCommunities } = useContext(MyContext);
     const createCommunityRef = useRef(null);
+
     useEffect(() => {
         const getCommunities = async () => {
             let response = await fetch(
@@ -14,7 +16,7 @@ function LeftBar() {
                     credentials: "include",
                 }
             );
-            let JSONData= await response.json();
+            let JSONData = await response.json();
 
             setCommunities(JSONData.data.communities);
         }
@@ -24,26 +26,25 @@ function LeftBar() {
     return (
         <div className="h-screen fixed border border-black p-5 bg-white left-0">
             <h1>LeftBar</h1>
-            <button onClick={()=> openModal(createCommunityRef)}>
+            <button onClick={() => openModal(createCommunityRef)}>
                 Create Community
             </button>
             <CreateCommunity
                 createCommunityRef={createCommunityRef}
-                communities = {communities}
-                setCommunities = {setCommunities}
+                communities={communities}
+                setCommunities={setCommunities}
 
             ></CreateCommunity>
             <div className="flex flex-col gap-2 ">
-            {communities.length > 0 && (
+                {communities && (
+                    communities.map(community => (
+                        <div key={community.id} >
 
-                communities.map(community => (
-                    <div key = {community.id} >
+                            <p>{community.name}</p>
 
-                        <p>{community.name}</p>
-
-                    </div>
-                ))
-            )}
+                        </div>
+                    ))
+                )}
             </div>
         </div>
     );
