@@ -132,9 +132,6 @@ class User
             $inputs[$key] = $value;
         }
 
-        // $title = $_POST['title'];
-        // $content = $_POST['content'];
-        // $community = $_POST['community'];
         global $db;
 
         try {
@@ -147,7 +144,6 @@ class User
 
             if ($stmt->execute()) {
                 $insertedRow = $stmt->fetch(PDO::FETCH_ASSOC);
-
                 $query = "SELECT * FROM tblCommunity WHERE id = :communityId";
                 $stmt = $db->prepare($query);
                 $stmt->bindParam(':communityId', $inputs['communityId']);
