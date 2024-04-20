@@ -103,6 +103,7 @@ class User
 
             if (password_verify($password, $user['password'])) {
                 $query = "SELECT * FROM tblUserProfile WHERE id = :id";
+                $stmt = $db->prepare($query);
                 $stmt->bindParam(':id', $user['id']);
                 $stmt->execute();
                 $profile= $stmt->fetch(PDO::FETCH_ASSOC);

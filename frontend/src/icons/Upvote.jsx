@@ -64,19 +64,20 @@ export default function Upvote({ post }) {
     useEffect(() => {
 
         if (post) {
-            let vote
+            let postVote
             if (post.votes.length > 0) {
-                vote = post.votes.find(v => v.userid == userData.id);
+                postVote = (post.votes).find(v => v.userid == userData.id);
+                setVote(postVote.vote)
             }
-            console.log(vote);
         }
     }, [post]);
 
     return (
         <>
-            {/* <button className="flex flex-row gap-1 items-center">
+
+            <button className="flex flex-row gap-1 items-center">
                 {vote == "upvote" && (
-                    <BiSolidUpvote onClick={handleDelete}></BiSolidUpvote>
+                    <BiSolidUpvote size = {20} onClick={handleDelete}></BiSolidUpvote>
                 )}
                 {(vote == "downvote" || vote == undefined) && (
                     <BiUpvote size={20} onClick={handleUpVote}></BiUpvote>
@@ -87,7 +88,7 @@ export default function Upvote({ post }) {
                 <h1 className="text-xs font-semibold">
                     {post.upvote_count}
                 </h1>
-            </div> */}
+            </div>
         </>
     )
 }
