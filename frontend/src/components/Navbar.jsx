@@ -5,6 +5,10 @@ import Spinner from "./Spinner.jsx";
 import { Link } from "react-router-dom";
 import { MyContext } from "../utils/Context";
 import { useNavigate } from "react-router-dom";
+import {Button} from "../stories/Button";
+import { MdForum } from "react-icons/md";
+import SearchBar from "../icons/SearchBar";
+
 
 const Navbar = () => {
     const navigate = useNavigate();
@@ -65,12 +69,13 @@ const Navbar = () => {
         <>
             {isLoading && <Spinner></Spinner>}
             <nav className="shadow-2xl text-md top-0 flex flex-row justify-between w-full p-3 items-center bg-zinc-50 border-b-[rgb(128,128,128)] z-50 mb-100">
-                <div>
+                <div className = "flex flex-row items-center gap-2">
+                    <MdForum size={30}></MdForum>
                     <Link to="/">
-                        <h1 className="font-bold text-2xl">LOGO</h1>
+                        <h1 className="font-bold text-2xl">RedditClone</h1>
                     </Link>
                 </div>
-
+                <SearchBar></SearchBar>
                 <div>{isLoggedIn && <></>}</div>
 
                 <div className="flex flex-row gap-5 items-center">
@@ -123,10 +128,9 @@ const Navbar = () => {
                         </>
                     ) : (
                         <>
-                            <button onClick={() => handleOpenDialog(registerRef)}>
-                                Register
-                            </button>
-                            <button onClick={() => handleOpenDialog(loginRef)}>Login</button>
+
+                            <Button label={"Register"} onClick={() => handleOpenDialog(registerRef)}></Button>
+                            <Button label={"Login"} onClick={() => handleOpenDialog(loginRef)}></Button>
                         </>
                     )}
                 </div>
