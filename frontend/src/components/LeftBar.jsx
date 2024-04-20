@@ -24,8 +24,7 @@ function LeftBar() {
     }, []);
 
     return (
-        <div className="h-screen fixed border border-black p-5 bg-white left-0">
-            <h1>LeftBar</h1>
+        <div className="h-screen fixed border border-r-black p-5 left-0 bg-gray-100">
             <button onClick={() => openModal(createCommunityRef)}>
                 Create Community
             </button>

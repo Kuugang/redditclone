@@ -102,12 +102,18 @@ class User
             }
 
             if (password_verify($password, $user['password'])) {
+                $query = "SELECT * FROM tblUserProfile WHERE id = :id";
+                $stmt->bindParam(':id', $user['id']);
+                $stmt->execute();
+                $profile= $stmt->fetch(PDO::FETCH_ASSOC);
+                $user['profile'] = $profile;
+
                 session_set_cookie_params([
                     'lifetime' => 3600,
                 ]);
                 session_start();
                 $_SESSION['user'] = new User($user['id'], $username, $user);
-                sendResponse("success", "Logged in successfuly", 200, array("sessionID" => session_id()));
+                sendResponse("success", "Logged in successfuly", 200, array("data" => array("sessionId" => session_id(),"user" => $user)));
             } else {
                 sendResponse("error", "Incorrect username or password", 400);
             }
@@ -181,8 +187,8 @@ class User
                                     'lastname', up.lastname)
                     FROM tblPost p
                     -- LEFT JOIN tblVote v ON p.id = v.postid
-                    LEFT JOIN tblUserAccount u ON p.authorid = u.id
-                    LEFT JOIN tblUserProfile up ON u.id = up.id
+                    -- LEFT JOIN tblUserAccount u ON p.authorid = u.id
+                    -- LEFT JOIN tblUserProfile up ON u.id = up.id
                     -- LEFT JOIN tblCommunity c ON p.communityid = c.id
                    WHERE p.id = :id";
 
@@ -246,12 +252,15 @@ class User
                     json_build_object('id', c.id,
                                     'name', c.name,
                                     'visibility', c.visibility) as community
-                    FROM tblPost p
+                        FROM tblPost p
                     LEFT JOIN tblUserAccount u ON p.authorid = u.id
                     LEFT JOIN tblUserProfile up ON p.authorid = up.id
                     LEFT JOIN tblCommunity c ON p.communityid = c.id 
+                    LEFT JOIN tblVote v ON v.postid = p.id 
+                    GROUP BY p.id, u.id, up.id, c.id
                     ORDER BY p.createdAt DESC
                     LIMIT :pageSize OFFSET :offset;";
+
 
                 $stmt = $db->prepare($query);
                 $stmt->bindParam(":pageSize", $pageSize);
@@ -263,6 +272,15 @@ class User
                     foreach ($results as &$post) {
                         $post['author'] = json_decode($post['author'], true);
                         $post['community'] = json_decode($post['community'], true);
+                        
+                        $query = "SELECT * FROM tblVote WHERE postid = :postId";
+                        $stmt = $db->prepare($query);
+                        $stmt->bindParam(":postId", $post['id']);
+                        $stmt->execute();
+                        $votes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                        $post['votes'] = $votes;
+
                         unset($post['authorid']);
                         unset($post['communityid']);
                     }
@@ -442,15 +460,16 @@ class User
             $stmt->execute();
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-
             if ($result == null) {
-                $query = "INSERT INTO tblVote (postId, userId, vote) VALUES (:postId, :userId, :vote)";
+                $query = "INSERT INTO tblVote (postId, userId, vote) VALUES (:postId, :userId, :vote) RETURNING *";
                 $stmt = $db->prepare($query);
                 $stmt->bindParam(":postId", $postId);
                 $stmt->bindParam(":userId", $this->id);
                 $stmt->bindParam(":vote", $vote);
                 $stmt->execute();
-            } else {
+                $vote = $stmt->fetch(PDO::FETCH_ASSOC);
+                sendResponse("success", "Upvoted post", 200, array("vote" => $vote));
+            }else {
                 $query = "UPDATE tblVote SET vote = :vote WHERE postId = :postId AND userId = :userId";
                 $stmt = $db->prepare($query);
                 $stmt->bindParam(":vote", $vote);
@@ -462,14 +481,8 @@ class User
                 if ($result == 0) {
                     sendResponse("error", "Failed to vote post", 500);
                 }
-            }
-
-            if ($vote == "upvote") {
-                sendResponse("success", "Upvoted post", 200);
-            } else {
                 sendResponse("success", "Downvoted post", 200);
             }
-
         } catch (PDOException $e) {
             sendResponse("failed", $e->getMessage(), 500);
         }

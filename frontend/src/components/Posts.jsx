@@ -1,12 +1,13 @@
-import React from "react";
+import React, { useContext } from "react";
 import Upvote from "../icons/Upvote";
 import Downvote from "../icons/Downvote";
 import Comment from "../icons/Comment";
 import Share from "../icons/Share";
+import { MyContext } from "../utils/Context";
 
 
-export default function Posts({posts, communityID, userID,timeAgo})
-{
+export default function Posts({ posts, communityID, userID, timeAgo }) {
+    const { userData } = useContext(MyContext);
     return (
         <>
             <div className="flex flex-row gap-5 justify-center items-center">
@@ -18,6 +19,10 @@ export default function Posts({posts, communityID, userID,timeAgo})
                                     key={post.id}
                                     className="border border-black rounded p-5 w-[500px] bg-gray-50"
                                 >
+                                    {/* {userData.id == post.author && (
+                                        <h1>What</h1>
+                                    )} */}
+
                                     <div className="flex text-xs flex-row gap-2 items-center">
                                         <div className="rounded rounded-full w-[25px] h-[25px] bg-gray-200"></div>
                                         <div className="flex flex-row gap-2">
@@ -30,17 +35,18 @@ export default function Posts({posts, communityID, userID,timeAgo})
                                         <h1 className="text-md font-bold">{post.title}</h1>
                                         <p className="text-sm">{post.content}</p>
                                     </div>
+                                    {userData != null && (
+                                        <div className="flex flex-row gap-3 text-xs">
+                                            <div className="flex flex-row gap-1 bg-zinc-200 p-1 rounded">
 
-                                    <div className="flex flex-row gap-3 text-xs">
-                                        <div className="flex flex-row gap-1 bg-zinc-200 p-1 rounded">
+                                                <Upvote post={post}></Upvote>
+                                                <Downvote post={post}></Downvote>
+                                            </div>
+                                            <Comment post={post}></Comment>
+                                            <Share post={post}></Share>
 
-                                            <Upvote post = {post}></Upvote>
-                                            <Downvote post = {post}></Downvote>
                                         </div>
-                                            <Comment post = {post}></Comment>
-                                            <Share post = {post}></Share>
-
-                                    </div>
+                                    )}
 
                                 </div>
                             ))}

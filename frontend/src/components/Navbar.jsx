@@ -5,7 +5,7 @@ import Spinner from "./Spinner.jsx";
 import { Link } from "react-router-dom";
 import { MyContext } from "../utils/Context";
 import { useNavigate } from "react-router-dom";
-import {Button} from "../stories/Button";
+import { Button } from "../stories/Button";
 import { MdForum } from "react-icons/md";
 import SearchBar from "../icons/SearchBar";
 
@@ -44,32 +44,32 @@ const Navbar = () => {
     }
 
     useEffect(() => {
-        const validateSession = async () => {
-            try {
-                const response = await fetch("http://localhost:6969/api/validate.php", {
-                    credentials: "include",
-                });
+        // const validateSession = async () => {
+        //     try {
+        //         const response = await fetch("http://localhost:6969/api/validate.php", {
+        //             credentials: "include",
+        //         });
 
-                if (response.status != 200) {
-                    throw new Error("Session validation failed");
-                } else {
-                    setIsLoggedIn(true);
-                }
-            } catch (error) {
-                console.error("Error validating session:", error);
-                setIsLoggedIn(false);
-                navigate("/");
-            }
-        };
+        //         if (response.status != 200) {
+        //             throw new Error("Session validation failed");
+        //         } else {
+        //             setIsLoggedIn(true);
+        //         }
+        //     } catch (error) {
+        //         console.error("Error validating session:", error);
+        //         setIsLoggedIn(false);
+        //         navigate("/");
+        //     }
+        // };
 
-        validateSession();
+        // validateSession();
     }, []);
 
     return (
         <>
             {isLoading && <Spinner></Spinner>}
-            <nav className="shadow-2xl text-md top-0 flex flex-row justify-between w-full p-3 items-center bg-zinc-50 border-b-[rgb(128,128,128)] z-50 mb-100">
-                <div className = "flex flex-row items-center gap-2">
+            <nav className="shadow-2xl text-md fixed top-0 flex flex-row justify-between w-full p-3 items-center bg-zinc-50 border-b-[rgb(128,128,128)] z-50 mb-100">
+                <div className="flex flex-row items-center gap-2">
                     <MdForum size={30}></MdForum>
                     <Link to="/">
                         <h1 className="font-bold text-2xl">RedditClone</h1>
