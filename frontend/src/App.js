@@ -7,6 +7,7 @@ import Dashboard from "./pages/Dashboard.jsx";
 import Submit from "./pages/Submit.jsx";
 import Navbar from "./components/Navbar.jsx";
 import './App.css';
+import AdminDashBoard from "./pages/AdminDashboard.jsx";
 
 function App() {
     return (
@@ -20,6 +21,7 @@ function App() {
                     <Route exact path="/" element={<Dashboard></Dashboard>}></Route>
                     <Route exact path="/submit" element={<Submit></Submit>}></Route>
                     <Route exact path="/submit" element={<Submit></Submit>}></Route>
+                    <Route exact path = "/admin" element = {<AdminDashBoard></AdminDashBoard>}></Route>
                 </Routes>
             </Router>
         </div>

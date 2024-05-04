@@ -5,13 +5,7 @@ import Comment from "../icons/Comment";
 import Share from "../icons/Share";
 import { MyContext } from "../utils/Context";
 
-function countVotesforPost(postID)
-{
-    const [votesCount, setVoteCounts] = useState({upvotes: 0, downvotes: 0});
-
-
     
-}
 export default function Posts({ posts, communityID, userID, timeAgo }) {
     const { userData } = useContext(MyContext);
 
