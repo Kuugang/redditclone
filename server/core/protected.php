@@ -13,7 +13,7 @@
 //     // session_start();
 // }
 
-if (isset ($_COOKIE['PHPSESSID'])) {
+if (isset($_COOKIE['PHPSESSID'])) {
     $sessionID = $_COOKIE['PHPSESSID'];
     session_start();
     if ($sessionID !== session_id())

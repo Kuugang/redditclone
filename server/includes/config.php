@@ -7,11 +7,13 @@ $user = "postgres.rafhblqrgvjzlxhigvlt";
 $password = "owgzvI0A9cLb4XDL";
 
 try {
-    $dsn = "pgsql:host=$host;port=$port;dbname=$dbname;user=$user;password=$password";
-    $db = new PDO($dsn);
-
-    $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $dsn = "pgsql:host=$host;port=$port;dbname=$dbname";
+    $options = array(
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_PERSISTENT => true,
+        PDO::ATTR_EMULATE_PREPARES => false
+    );
+    $db = new PDO($dsn, $user, $password, $options);
 
     // $localTimezone = date_default_timezone_get();
     // $setTZQuery = "SET TIME ZONE '" . $localTimezone . "'";

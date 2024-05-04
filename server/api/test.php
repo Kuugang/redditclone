@@ -1,8 +1,8 @@
 <?php
-require_once("../core/initialize.php");
+require_once ("../core/initialize.php");
 $supabaseUrl = 'https://rafhblqrgvjzlxhigvlt.supabase.co/storage/v1/object/post-images/test.jpg';
 $filePath = SITE_ROOT . DS . 'cato.jpg';
-$apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJhZmhibHFyZ3Zqemx4aGlndmx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDk2MTMyOTYsImV4cCI6MjAyNTE4OTI5Nn0.PPsQS0BFAVjYnk9WejQBnXAoAWAROX4fTX8GbY7sg5g';
+$apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJhZmhibHFyZ3Zqemx4aGlndmx0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcwOTYxMzI5NiwiZXhwIjoyMDI1MTg5Mjk2fQ.hdnYG3UDwEolp6-mspMJHC3TevtNy09lnTE9dUmhjJw';
 $bearerToken = 'DF/9o9MigzgIuYT0S1h8gKtE2zzp/t6NjeBpV/IpfkGkq9pBBUYECmPxUMQ3ceXNiptAQx+BaGT2VHYJImW5qA==';
 
 $ch = curl_init();
@@ -18,8 +18,7 @@ curl_setopt($ch, CURLOPT_POSTFIELDS, file_get_contents($filePath));
 
 // Set headers
 $headers = [
-    // 'apikey: ' . $apiKey,
-    'Authorization: Bearer ' . $bearerToken,
+    'Authorization: Bearer ' . $apiKey,
     'Content-Type: application/octet-stream', // Assuming binary data
 ];
 curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
@@ -39,4 +38,3 @@ if (curl_errno($ch)) {
 
 // Close cURL resource
 curl_close($ch);
-?>
