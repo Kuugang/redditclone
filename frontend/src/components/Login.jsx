@@ -3,6 +3,8 @@ import Spinner from "./Spinner.jsx"; // assuming Spinner component is in JSX
 import { json, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { MyContext } from "../utils/Context.jsx";
+import {IoIosCloseCircleOutline} from "react-icons/io";
+import {IoCloseCircle, IoCloseCircleOutline} from "react-icons/io5";
 
 const Login = ({ loginRef, handleCloseDialog, setIsLoggedIn, isLoading, setIsLoading }) => {
   const { userData, setUserData } = useContext(MyContext);
@@ -46,46 +48,47 @@ const Login = ({ loginRef, handleCloseDialog, setIsLoggedIn, isLoading, setIsLoa
     <dialog ref={loginRef}>
       {isLoading && <Spinner></Spinner>}
       <form
-        onSubmit={handleLogin}
-        method="POST"
-        className="border rounded p-6 flex flex-col gap-1 w-[500px]"
+          onSubmit={handleLogin}
+          method="POST"
+          className="border rounded p-6 flex flex-col gap-1 w-[500px]"
       >
-        <div className="flex flex-row justify-between">
+        <div className="flex flex-row justify-between ">
           <h1 className="font-bold text-2xl">Login</h1>
           <button
-            type="button"
-            className="border rounded-full px-2 py-1 bg-zinc-500 text-white hover:text-black hover:bg-white hover:border-black transition-all ease-in-out"
-            onClick={() => handleCloseDialog(loginRef)}
+              type="button"
+              onClick={() => handleCloseDialog(loginRef)}
           >
-            <svg
-              fill="currentColor"
-              height="16"
-              icon-name="close-outline"
-              viewBox="0 0 20 20"
-              width="16"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path d="m18.442 2.442-.884-.884L10 9.116 2.442 1.558l-.884.884L9.116 10l-7.558 7.558.884.884L10 10.884l7.558 7.558.884-.884L10.884 10l7.558-7.558Z"></path>
-            </svg>
+            <IoCloseCircle className="h-6 w-6 transition duration-300 ease-in-out hover:text-red-500"/>
+
           </button>
         </div>
-        <label htmlFor="loginUsername">Username</label>
-        <input
-          id="loginUsername"
-          name="username"
-          className="border"
-          type="text"
-        ></input>
-        <label htmlFor="loginPassword">Password</label>
-        <input
-          id="loginPassword"
-          name="password"
-          className="border"
-          type="password"
-        ></input>
+        <p className="mb-10 ml-10 mr-10 mt-5 text-sm">By continuing, you agree to our User Agreement and acknowledge
+          that you understand the Privacy Policy.</p>
+        <div className="flex flex-col justify-center items-center">
+          <input
+              id="loginUsername"
+              name="username"
+              className="border h-10 px-4 rounded-xl mb-5 w-8/12"
+              type="text"
+              placeholder="Username"
+          />
+          <input
+              id="loginPassword"
+              name="password"
+              className="border h-10 px-4 rounded-xl mb-3  w-8/12 "
+              type="password"
+              placeholder="Password"
+          />
+          <div className="flex flex-row gap-2 mt-10">
+            <p className=" text-sm">Don't have an account?</p>
+            <a className="text-sm text-blue-500" onClick={() => {
+              handleCloseDialog(loginRef);
+            }}>Sign up now</a>
+          </div>
+        </div>
         <button
-          type="submit"
-          className="border rounded px-3 py-2 bg-blue-500 text-white hover:text-blue-500 hover:bg-white transition-all ease-in-out"
+            type="submit"
+            className="mt-28 ml-20 mr-20 rounded-3xl border px-3 py-2 bg-blue-500 text-white transition-all duration-300 ease-in-out hover:bg-blue-800 hover:text-white"
         >
           Login
         </button>
