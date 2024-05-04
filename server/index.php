@@ -9,12 +9,25 @@ spl_autoload_register(function ($class) {
 set_error_handler("ErrorHandler::handleError");
 set_exception_handler("ErrorHandler::handleException");
 
-header("Content-type: application/json; charset=UTF-8");
-
 defined('DS') ? null : define("DS", DIRECTORY_SEPARATOR);
 defined("SITE_ROOT") ? null : define("SITE_ROOT", realpath(dirname(__FILE__)) . DS . "./src");
 defined("CONTROLLERS_PATH") ? null : define("CONTROLLERS_PATH", SITE_ROOT . DS . 'controllers');
 defined("MIDDLEWARES_PATH") ? null : define("MIDDLEWARES_PATH", SITE_ROOT . DS . 'middlewares');
+defined("FRONTEND_URL") ? null : define("FRONTEND_URL", "http://localhost:3000");
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    header("Access-Control-Allow-Methods: POST, GET, DELETE, PUT");
+    header("Access-Control-Allow-Headers: Content-Type, Authorization");
+    header("Access-Control-Allow-Origin: " . FRONTEND_URL);
+    header("Access-Control-Allow-Credentials: true");
+    exit;
+}
+
+header("Access-Control-Allow-Origin: " . FRONTEND_URL);
+header("Access-Control-Allow-Credentials: true");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Content-type: application/json; charset=UTF-8");
+
 $controllers = glob(CONTROLLERS_PATH . DS . "*.php");
 $middlewares = glob(MIDDLEWARES_PATH . DS . "*.php");
 
@@ -39,6 +52,7 @@ $password = "owgzvI0A9cLb4XDL";
 
 $database = new Database("$host", "$dbname", $user, $password, $port);
 
+
 if (str_contains($parts[1], '?')) {
     $parts[1] = explode("?", $parts[1])[0];
 }
@@ -61,9 +75,3 @@ switch ($parts[1]) {
         http_response_code(404);
         exit;
 }
-
-// if ($parts[1] == "products") {
-//     $gateway = new ProductGateway($database);
-//     $controller = new ProductController($gateway);
-//     $controller->processRequest($_SERVER["REQUEST_METHOD"], $id);
-// }

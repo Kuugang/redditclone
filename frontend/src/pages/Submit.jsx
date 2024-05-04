@@ -15,24 +15,21 @@ const Submit = () => {
         e.preventDefault();
         try {
             setIsLoading(true);
-            let inputs = new FormData();
-            inputs.append("title", e.target.title.value);
-            inputs.append("content", e.target.content.value);
-            inputs.append("communityId", e.target.community.value);
+            let inputs = {
+                "title": e.target.title.value,
+                "content": e.target.content.value,
+                "communityId": e.target.community.value,
+            }
 
-            let response = await fetch("http://localhost:6969/api/post/create.php", {
+            let response = await fetch("http://localhost:6969/posts", {
                 method: "POST",
-                body: inputs,
+                body: JSON.stringify(inputs),
                 credentials: "include",
             });
 
             if (response.status === 200) {
-                let data = await response.json();
-                if (posts.length > 0)
-                    setPosts((posts) => [data.newPost, ...posts]);
-                else
-                    setPosts([data.newPost]);
-
+                let responseJSON = await response.json();
+                setPosts((posts) => [responseJSON.data.post, ...posts]);
                 setIsLoading(false);
                 toast("Post created successfully");
                 navigate("/");
@@ -61,7 +58,7 @@ const Submit = () => {
 
                     <div className="w-full">
                         <label>Choose a community: </label>
-                        {communities.length > 0 ? (
+                        {communities && communities.length > 0 ? (
                             <select name="community" className="w-full">
                                 {communities.map(community => (
                                     <option key={community.id} value={community.id}>{community.name}</option>

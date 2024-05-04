@@ -20,12 +20,18 @@ class UserController
             case "/login":
                 $this->login();
                 break;
+
+            case "/communities":
+                $this->getCommunities();
+                break;
+            case "/validate":
+                $this->validateSession();
+                break;
         }
     }
 
     public function register(): void
     {
-        // $_SERVER['REQUEST_METHOD'] 
 
         $requiredInputs = ["username", "password", "email", "firstName", "lastName", "gender", "birthDate"];
         validateRequiredFields($requiredInputs);
@@ -79,11 +85,12 @@ class UserController
 
     public function login(): void
     {
+        header('Access-Control-Allow-Methods: POST OPTIONS');
         $requiredInputs = ["email", "password"];
-        validateRequiredFields($requiredInputs);
+        validateRequiredJSONInput($requiredInputs);
 
-        $email = $_POST['email'];
-        $password = $_POST['password'];
+        $email = getJSONInputValue("email");
+        $password = getJSONInputValue("password");
 
         try {
             $query = "SELECT * FROM tblUserAccount WHERE email = :email";
@@ -128,6 +135,36 @@ class UserController
             }
         } catch (PDOException $e) {
             sendResponse("error", $e->getMessage(), 500);
+        }
+    }
+
+    public function getCommunities()
+    {
+        $user = getUser();
+        try {
+            $query = "SELECT c.*
+                FROM tblCommunity c
+                LEFT JOIN tblCommunityMember cm ON cm.userid = :userid AND cm.communityid = c.id 
+            ";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(":userid", $user->id);
+            $stmt->execute();
+            $communities = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            sendResponse(true, "Successfully fetchd user communities", 200, array("data" => array("communities" => $communities)));
+
+        } catch (PDOException $e) {
+            sendResponse(false, $e->getMessage(), 500);
+        }
+    }
+
+    public function validateSession()
+    {
+        $user = getUser();
+        if ($user) {
+            sendResponse(true, "Session ID is valid", 200, array("data" => array("user" => $user)));
+        } else {
+            sendResponse(false, "Session ID is not valid", 403);
         }
     }
 }

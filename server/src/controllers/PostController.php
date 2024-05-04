@@ -91,6 +91,7 @@ class PostController
                 $result = $stmt->fetch(PDO::FETCH_ASSOC);
                 $insertedRow['author'] = $result;
                 unset($result['authorid']);
+                $insertedRow['votes'] = array();
                 sendResponse("success", "Post created successfully", 200, array("data" => array("post" => $insertedRow)));
             }
         } catch (PDOException $e) {
@@ -129,6 +130,7 @@ class PostController
                     SELECT json_agg(
                         json_build_object(
                             'id', v.id,
+                            'userid', v.userid,
                             'vote', v.vote
                         )
                     )
@@ -160,7 +162,13 @@ class PostController
             foreach ($results as &$post) {
                 $post['author'] = json_decode($post['author'], true);
                 $post['community'] = json_decode($post['community'], true);
-                $post['votes'] = json_decode($post['votes'], true);
+
+                if ($post['votes']) {
+                    $post['votes'] = json_decode($post['votes'], true);
+                } else {
+                    $post['votes'] = array();
+                }
+
                 unset($post['authorid']);
                 unset($post['communityid']);
             }
@@ -280,23 +288,23 @@ class PostController
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($result == null) {
-                $query = "INSERT INTO tblVote (postId, userId, vote) VALUES (:postId, :userId, :vote) RETURNING *";
+                $query = "INSERT INTO tblVote (postId, userId, vote) VALUES (:postId, :userId, :vote) RETURNING id, userid, vote";
                 $stmt = $this->conn->prepare($query);
                 $stmt->bindParam(":postId", $postId);
                 $stmt->bindParam(":userId", $user->id);
                 $stmt->bindParam(":vote", $vote);
                 $stmt->execute();
                 $vote = $stmt->fetch(PDO::FETCH_ASSOC);
-                sendResponse(true, $vote == "upvote" ? "Upvoted post" : "Downvoted post", 200, array("vote" => $vote));
+                sendResponse(true, $vote == "upvote" ? "Upvoted post" : "Downvoted post", 200, array("data" => array("vote" => $vote)));
             } else {
-                $query = "UPDATE tblVote SET vote = :vote WHERE postId = :postId AND userId = :userId";
+                $query = "UPDATE tblVote SET vote = :vote WHERE postId = :postId AND userId = :userId RETURNING id, userid, vote";
                 $stmt = $this->conn->prepare($query);
                 $stmt->bindParam(":vote", $vote);
                 $stmt->bindParam(":postId", $postId);
                 $stmt->bindParam(":userId", $user->id);
                 $stmt->execute();
-                $result = $stmt->rowCount();
-                sendResponse(true, $vote == "upvote" ? "Upvoted post" : "Downvoted post", 200);
+                $vote = $stmt->fetch(PDO::FETCH_ASSOC);
+                sendResponse(true, $vote == "upvote" ? "Upvoted post" : "Downvoted post", 200, array("data" => array("vote" => $vote)));
             }
         } catch (PDOException $e) {
             sendResponse("failed", $e->getMessage(), 500);
@@ -306,12 +314,12 @@ class PostController
     public function deleteVote()
     {
         $user = getUser();
-        validateRequiredJSONInput(["voteId"]);
-        $voteId = getJSONInputValue("voteId");
+        validateRequiredJSONInput(["postId"]);
+        $postId = getJSONInputValue("postId");
         try {
-            $query = "DELETE FROM tblVote WHERE id = :id AND userid = :userid";
+            $query = "DELETE FROM tblVote WHERE postid = :postid AND userid = :userid";
             $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(":id", $voteId);
+            $stmt->bindParam(":postid", $postId);
             $stmt->bindParam(":userid", $user->id);
             $stmt->execute();
             if ($stmt->rowCount() > 0) {

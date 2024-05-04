@@ -2,9 +2,9 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import CreateCommunity from "./CreateCommunity.jsx";
 import { openModal } from "../utils/functions";
 import { MyContext } from "../utils/Context.jsx";
-import {FaHouse} from "react-icons/fa6";
-import {AiTwotoneLike} from "react-icons/ai";
-import {RiCommunityLine} from "react-icons/ri";
+import { FaHouse } from "react-icons/fa6";
+import { AiTwotoneLike } from "react-icons/ai";
+import { RiCommunityLine } from "react-icons/ri";
 
 function LeftBar() {
     const { communities, setCommunities } = useContext(MyContext);
@@ -13,14 +13,13 @@ function LeftBar() {
     useEffect(() => {
         const getCommunities = async () => {
             let response = await fetch(
-                "http://localhost:6969/api/community/read.php",
+                "http://localhost:6969/users/communities",
                 {
                     method: "GET",
                     credentials: "include",
                 }
             );
             let JSONData = await response.json();
-
             setCommunities(JSONData.data.communities);
         }
         getCommunities();
@@ -29,14 +28,14 @@ function LeftBar() {
     return (
         <div className="h-screen fixed border border-r-black p-5 left-0 bg-gray-100">
             <button className="flex flex-row items-center gap-3 justify-center">
-                <FaHouse className="w-4 h-4"/>
+                <FaHouse className="w-4 h-4" />
                 Home
             </button>
             <button className="flex flex-row items-center gap-3 justify-center">
-                <AiTwotoneLike className="w-4 h-4"/>
+                <AiTwotoneLike className="w-4 h-4" />
                 Popular
             </button>
-            <hr className="border-black mt-2"/>
+            <hr className="border-black mt-2" />
 
             <button className="flex flex-row items-center gap-3 justify-center mt-2" onClick={() => openModal(createCommunityRef)}>
                 <RiCommunityLine className="w-4 h-4" />
@@ -46,13 +45,15 @@ function LeftBar() {
                 createCommunityRef={createCommunityRef}
                 communities={communities}
                 setCommunities={setCommunities}
-
             ></CreateCommunity>
             <div className="flex flex-col gap-2 mt-4  items-start ml-4">
                 {communities && (
                     communities.map(community => (
-                        <div key={community.id}>
-                            <p>r/{community.name}</p>
+                        <div key={community.id} className="flex flex-row gap-2 items-end">
+                            <div className="rounded-full w-[30px] h-[30px] bg-gray-200 border border-black">
+                                <img src={community.communityimage} className="w-full h-full rounded-full object-cover" />
+                            </div>
+                            <p className="font-semibold text-base">r/{community.name}</p>
                         </div>
                     ))
                 )}

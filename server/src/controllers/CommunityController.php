@@ -83,7 +83,13 @@ class CommunityController
     {
         try {
             $query = "SELECT * FROM tblCommunity";
+            if (isset($_GET['name'])) {
+                $query .= " WHERE name = :name";
+            }
             $stmt = $this->conn->prepare($query);
+            if (isset($_GET['name'])) {
+                $stmt->bindParam(":name", $_GET['name']);
+            }
             $stmt->execute();
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
             sendResponse(true, "Successfully fetched communities", 200, array("data" => array("communities" => $result)));
