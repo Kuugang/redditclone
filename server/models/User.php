@@ -298,6 +298,58 @@ class User
         }
 
 
+        try {
+            $query = "SELECT p.*, 
+                json_build_object('id', u.id,
+                                    'username', u.username,
+                                    'firstName', up.firstname,
+                                    'lastName', up.lastname,
+                                    'gender', up.gender,
+                                    'birthdate', up.birthdate,
+                                    'createdAt', up.createdAt,
+                                    'updatedAt', up.updatedAt) AS author,
+                json_build_object('id', c.id,
+                                'name', c.name,
+                                'visibility', c.visibility) as community
+                    FROM tblPost p
+                LEFT JOIN tblUserAccount u ON p.authorid = u.id
+                LEFT JOIN tblUserProfile up ON p.authorid = up.id
+                LEFT JOIN tblCommunity c ON p.communityid = c.id 
+                LEFT JOIN tblVote v ON v.postid = p.id 
+                GROUP BY p.id, u.id, up.id, c.id
+                ORDER BY p.createdAt DESC";
+
+            $stmt = $db->prepare($query);
+            $stmt->execute();
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if ($results) {
+                foreach ($results as &$post) {
+                    $post['author'] = json_decode($post['author'], true);
+                    $post['community'] = json_decode($post['community'], true);
+                    
+                    $query = "SELECT * FROM tblVote WHERE postid = :postId";
+                    $stmt = $db->prepare($query);
+                    $stmt->bindParam(":postId", $post['id']);
+                    $stmt->execute();
+                    $votes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                    $post['votes'] = $votes;
+
+                    unset($post['authorid']);
+                    unset($post['communityid']);
+                }
+
+                unset($post);
+
+                sendResponse("success", "Posts retrieved successfully", 200, array("data" => array("posts" => $results)));
+            } else {
+                sendResponse("failed", "Page not found", 404);
+            }
+        } catch (PDOException $e) {
+            sendResponse("failed", $e->getMessage(), 500);
+        }
+
         // if (isset($_GET['filter'])) {
         //     $filter = '%' . $_GET['filter'] . '%';
 
@@ -647,7 +699,7 @@ class User
         }
     }
 
-    public function readCommunity()
+    public static function readCommunity()
     {
         // $requiredInputs = ["name", "visibility"];
         // foreach ($requiredInputs as $input) {
@@ -666,6 +718,26 @@ class User
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             sendResponse("success", "Successfully fetched communities", 200, array("data" => array("communities" => $result)));
+        } catch (PDOException $e) {
+            sendResponse("failed", $e->getMessage(), 500);
+        }
+    }
+
+
+    public static function adminGetUsers(){
+        global $db;
+        try {
+            $query = "
+                SELECT u.*,
+                    ua.email AS email
+                FROM tblUserProfile u
+                LEFT JOIN tblUserAccount ua ON ua.id = u.id
+            ";
+
+            $stmt = $db->prepare($query);
+            $stmt->execute();
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            sendResponse("success", "Successfully fetched users", 200, array("data" => array("users" => $result)));
         } catch (PDOException $e) {
             sendResponse("failed", $e->getMessage(), 500);
         }
