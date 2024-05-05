@@ -18,20 +18,14 @@ export default function Downvote({ vote, setVote, post, handleVote, handleDelete
 
     return (
         <>
-            <button className="flex flex-row gap-1 items-center">
+            <button>
                 {vote == "downvote" && (
-                    <BiSolidDownvote size={20} onClick={() => handleDeleteVote(post, setVote)} className="hover:text-blue-600"></BiSolidDownvote>
+                    <BiSolidDownvote size={20} onClick={() => handleDeleteVote(post, setVote)}></BiSolidDownvote>
                 )}
                 {(vote == "upvote" || vote == undefined) && (
                     <BiDownvote size={20} onClick={() => handleVote(post, "downvote", setVote)} className="hover:text-blue-600"></BiDownvote>
                 )}
             </button >
-
-            <div className="flex flex-row items-center">
-                <h1 className="text-xs font-semibold">
-                    {post.upvote_count}
-                </h1>
-            </div>
         </>
     )
 }

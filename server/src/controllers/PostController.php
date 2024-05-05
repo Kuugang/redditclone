@@ -66,7 +66,7 @@ class PostController
             if ($community['visibility'] == "private") {
                 $query = "SELECT * FROM tblCommunityMember WHERE userId = :userId AND communityId = :communityId";
                 $stmt = $this->conn->prepare($query);
-                $stmt->bindParam(":userId", $user->id);
+                $stmt->bindParam(":userId", $user['id']);
                 $stmt->bindParam(":communityId", $communityId);
                 $stmt->execute();
 
@@ -76,7 +76,7 @@ class PostController
 
             $query = 'INSERT INTO tblPost (authorId, communityId, title, content) VALUES (:authorId, :communityId, :title, :content) RETURNING *';
             $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(':authorId', $user->id);
+            $stmt->bindParam(':authorId', $user['id']);
             $stmt->bindParam(':title', $title);
             $stmt->bindParam(':content', $content);
             $stmt->bindParam(':communityId', $communityId);
@@ -86,7 +86,7 @@ class PostController
                 $insertedRow['community'] = $community;
                 $query = "SELECT * FROM tblUserProfile WHERE id = :authorId";
                 $stmt = $this->conn->prepare($query);
-                $stmt->bindParam(':authorId', $user->id);
+                $stmt->bindParam(':authorId', $user['id']);
                 $stmt->execute();
                 $result = $stmt->fetch(PDO::FETCH_ASSOC);
                 $insertedRow['author'] = $result;
@@ -190,7 +190,7 @@ class PostController
         try {
             $query = "DELETE FROM tblPost WHERE id = :id AND authorid = :authorid";
             $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(":authorid", $user->id);
+            $stmt->bindParam(":authorid", $user['id']);
             $stmt->bindParam(":id", $postId);
             $stmt->execute();
             $rows = $stmt->rowCount();
@@ -234,7 +234,7 @@ class PostController
                 $query .= implode(", ", $setClauses);
                 $query .= " , updatedat = NOW() WHERE id = :id AND authorid = :authorid";
                 $params[':id'] = $postId;
-                $params[':authorid'] = $user->id;
+                $params[':authorid'] = $user['id'];
 
                 $stmt = $this->conn->prepare($query);
                 $stmt->execute($params);
@@ -283,7 +283,7 @@ class PostController
             $query = "SELECT * FROM tblVote WHERE postId = :postId AND userId = :userId";
             $stmt = $this->conn->prepare($query);
             $stmt->bindParam(":postId", $postId);
-            $stmt->bindParam(":userId", $user->id);
+            $stmt->bindParam(":userId", $user['id']);
             $stmt->execute();
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -291,7 +291,7 @@ class PostController
                 $query = "INSERT INTO tblVote (postId, userId, vote) VALUES (:postId, :userId, :vote) RETURNING id, userid, vote";
                 $stmt = $this->conn->prepare($query);
                 $stmt->bindParam(":postId", $postId);
-                $stmt->bindParam(":userId", $user->id);
+                $stmt->bindParam(":userId", $user['id']);
                 $stmt->bindParam(":vote", $vote);
                 $stmt->execute();
                 $vote = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -301,7 +301,7 @@ class PostController
                 $stmt = $this->conn->prepare($query);
                 $stmt->bindParam(":vote", $vote);
                 $stmt->bindParam(":postId", $postId);
-                $stmt->bindParam(":userId", $user->id);
+                $stmt->bindParam(":userId", $user['id']);
                 $stmt->execute();
                 $vote = $stmt->fetch(PDO::FETCH_ASSOC);
                 sendResponse(true, $vote == "upvote" ? "Upvoted post" : "Downvoted post", 200, array("data" => array("vote" => $vote)));
@@ -320,7 +320,7 @@ class PostController
             $query = "DELETE FROM tblVote WHERE postid = :postid AND userid = :userid";
             $stmt = $this->conn->prepare($query);
             $stmt->bindParam(":postid", $postId);
-            $stmt->bindParam(":userid", $user->id);
+            $stmt->bindParam(":userid", $user['id']);
             $stmt->execute();
             if ($stmt->rowCount() > 0) {
                 sendResponse(true, "Successfully deleted vote", 200);

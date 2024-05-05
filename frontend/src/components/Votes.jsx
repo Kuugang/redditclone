@@ -1,17 +1,28 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import Upvote from "../icons/Upvote";
 import Downvote from "../icons/Downvote";
 import { MyContext } from '../utils/Context';
 
-function Votes({ post, votesDisplay }) {
+function Votes({ post }) {
     const { userData, posts, setPosts } = useContext(MyContext)
     const [vote, setVote] = useState();
+    const [votesDisplay, setVotesDisplay] = useState(0);
+
     async function handleDeleteVote(post, setVote) {
         try {
             let inputs = {
                 "postId": post.id
             }
 
+            if (vote == "upvote") {
+                setVotesDisplay(votesDisplay - 1);
+            }
+
+            if (vote == "downvote") {
+                setVotesDisplay(votesDisplay + 1);
+            }
+
+            setVote(undefined)
             await fetch(
                 "http://localhost:6969/posts/votes",
                 {
@@ -30,18 +41,30 @@ function Votes({ post, votesDisplay }) {
             });
 
             setPosts(updatedPosts);
-            setVote(undefined)
         } catch (e) {
         }
     }
 
-    async function handleVote(post, vote, setVote) {
+    async function handleVote(post, userVote, setVote) {
         try {
             let inputs = {
                 "postId": post.id,
-                "vote": vote
+                "vote": userVote
             }
 
+            if (vote != undefined) {
+                console.log("WTHST")
+                if (vote == "upvote") {
+                    setVotesDisplay(votesDisplay - 2);
+                }
+
+                if (vote == "downvote") {
+                    setVotesDisplay(votesDisplay + 2);
+                }
+            } else {
+                setVotesDisplay(userVote == "upvote" ? votesDisplay + 1 : votesDisplay - 1);
+            }
+            setVote(userVote)
             let response = await fetch(
                 "http://localhost:6969/posts/votes",
                 {
@@ -59,7 +82,7 @@ function Votes({ post, votesDisplay }) {
                     if (p.votes.find(v => v.userid == userData.id)) {
                         updatedVotes = p.votes.map(v => {
                             if (v.id === newVote.id) {
-                                return { ...v, vote: vote };
+                                return { ...v, vote: userVote };
                             }
                             return v;
                         });
@@ -75,13 +98,18 @@ function Votes({ post, votesDisplay }) {
                 return p;
             });
             setPosts(updatedPosts);
-            setVote(vote)
         } catch (e) {
         }
     }
 
+    useEffect(() => {
+        if (post.votes.length > 0) {
+            setVotesDisplay(post.votes.filter(p => p.vote == "upvote").length - post.votes.filter(p => p.vote == "downvote").length)
+        }
+    }, [])
+
     return (
-        <div className="flex flex-row gap-1 bg-zinc-300 p-1 rounded items-center rounded-lg">
+        <div className={`flex flex-row items-center gap-1 bg-[#1a282d] rounded-lg p-1 ${vote == "upvote" && 'bg-[#D93A00]'} ${vote == "downvote" && 'bg-[#6A5CFF]'} `}>
             <Upvote post={post} vote={vote} setVote={setVote} handleVote={handleVote} handleDeleteVote={handleDeleteVote}></Upvote>
             <p className="font-semibold">{votesDisplay}</p>
             <Downvote post={post} vote={vote} setVote={setVote} handleVote={handleVote} handleDeleteVote={handleDeleteVote}></Downvote>

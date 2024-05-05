@@ -53,7 +53,7 @@ class CommunityController
             $stmt = $this->conn->prepare($query);
             $stmt->bindParam(":name", $name);
             $stmt->bindParam(":visibility", $visibility);
-            $stmt->bindParam(":ownerId", $user->id);
+            $stmt->bindParam(":ownerId", $user['id']);
             $stmt->bindParam(":about", $about);
             $stmt->bindParam(":communityImageURL", $communityImageURL);
             $stmt->bindParam(":communityBannerURL", $communityBannerURL);
@@ -62,7 +62,7 @@ class CommunityController
                 $insertedRow = $stmt->fetch(PDO::FETCH_ASSOC);
                 $query = 'INSERT INTO tblCommunityMember(userId, communityId, privilege) VALUES (:userId, :communityId, :privilege)';
                 $stmt = $this->conn->prepare($query);
-                $stmt->bindParam(":userId", $user->id);
+                $stmt->bindParam(":userId", $user['id']);
                 $stmt->bindParam(":communityId", $insertedRow['id']);
                 $privilege = "administrator";
                 $stmt->bindParam(":privilege", $privilege);
@@ -113,7 +113,7 @@ class CommunityController
             $query = "DELETE FROM tblCommunity WHERE id = :id AND ownerid = :ownerid;";
             $stmt = $this->conn->prepare($query);
             $stmt->bindParam(":id", $communityId);
-            $stmt->bindParam(":ownerid", $user->id);
+            $stmt->bindParam(":ownerid", $user['id']);
             $stmt->execute();
             if ($stmt->rowCount() > 0) {
                 sendResponse(true, "Successfully deleted community", 200);
@@ -170,7 +170,7 @@ class CommunityController
             $query .= implode(", ", $setClauses);
             $query .= " , updatedat = NOW() WHERE id = :communityId AND ownerid = :ownerid";
             $params[':communityId'] = $communityId;
-            $params[':ownerid'] = $user->id;
+            $params[':ownerid'] = $user['id'];
 
             try {
                 $stmt = $this->conn->prepare($query);

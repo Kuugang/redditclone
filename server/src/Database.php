@@ -50,6 +50,7 @@ class Database
              lastName VARCHAR(50) NOT NULL,
              gender gender NOT NULL,
              birthdate DATE NOT NULL,
+             profileImage DATE,
              createdAt TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
              updatedAt TIMESTAMPTZ,
              FOREIGN KEY (id) REFERENCES tblUserAccount(id) ON DELETE CASCADE

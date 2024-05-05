@@ -36,7 +36,7 @@ function App() {
     }, [])
 
     return (
-        <div className="App pt-[66px]">
+        <div className="App pt-[66px] bg-[rgb(11,20,22)]">
             <Router>
                 <Navbar />
                 <ToastContainer />

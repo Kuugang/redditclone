@@ -117,16 +117,18 @@ class UserController
                 ]);
                 session_start();
 
-                $_SESSION['user'] = new User(
-                    $user['id'],
-                    $email,
-                    $profile['username'],
-                    $profile['firstname'],
-                    $profile['lastname'],
-                    $profile['birthdate'],
-                    $profile['createdat'],
-                    $profile['updatedat']
-                );
+                // $_SESSION['user'] = new User(
+                //     $user['id'],
+                //     $email,
+                //     $profile['username'],
+                //     $profile['firstname'],
+                //     $profile['lastname'],
+                //     $profile['birthdate'],
+                //     $profile['createdat'],
+                //     $profile['updatedat']
+                // );
+
+                $_SESSION['user'] = $user;
 
                 sendResponse("success", "Logged in successfuly", 200, array("data" => array("sessionId" => session_id(), "user" => $user)));
 
@@ -147,7 +149,7 @@ class UserController
                 LEFT JOIN tblCommunityMember cm ON cm.userid = :userid AND cm.communityid = c.id 
             ";
             $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(":userid", $user->id);
+            $stmt->bindParam(":userid", $user['id']);
             $stmt->execute();
             $communities = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

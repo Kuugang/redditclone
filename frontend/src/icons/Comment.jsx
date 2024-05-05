@@ -1,12 +1,11 @@
 import React from "react";
 
 
-export default function Comment({post})
-{
+export default function Comment({ post }) {
 
     return (
         <>
-            <button className="flex flex-row gap-1 items-center bg-zinc-200 p-1 rounded">
+            <button className="flex flex-row gap-1 items-center p-1 rounded bg-[#1a282d]">
                 <svg
                     aria-hidden="true"
                     className="icon-comment"

@@ -1,6 +1,6 @@
 <?php
 
-function getUser(): User
+function getUser()
 {
     if (isset($_COOKIE['PHPSESSID'])) {
         $session_id = $_COOKIE['PHPSESSID'];

@@ -12,10 +12,12 @@ import SearchBar from "../icons/SearchBar";
 
 const Navbar = () => {
     const navigate = useNavigate();
-    const { isLoggedIn, setIsLoggedIn } = useContext(MyContext);
+    const { isLoggedIn, setIsLoggedIn, userData, setUserData } = useContext(MyContext);
     const [isLoading, setIsLoading] = useState(false);
+    const [toggleProfileOptions, setToggleProfileOption] = useState(false);
     const loginRef = useRef(null);
     const registerRef = useRef(null);
+    const profileRef = useRef(null);
 
     const handleOpenDialog = (ref) => {
         if (ref.current) {
@@ -30,45 +32,17 @@ const Navbar = () => {
     };
 
     async function handleLogout() {
-        setIsLoading(true);
-        const response = await fetch("http://localhost:6969/api/user/logout.php", {
-            method: "POST",
-            credentials: "include",
-        });
-        if (response.status == 200) {
-            setIsLoading(false);
-            document.cookie = "PHPSESSID=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
-            setIsLoggedIn(false);
-            navigate("/");
-        }
+        setToggleProfileOption(false);
+        document.cookie = "PHPSESSID=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        setIsLoggedIn(false);
+        setUserData(null);
+        navigate("/");
     }
-
-    useEffect(() => {
-        // const validateSession = async () => {
-        //     try {
-        //         const response = await fetch("http://localhost:6969/api/validate.php", {
-        //             credentials: "include",
-        //         });
-
-        //         if (response.status != 200) {
-        //             throw new Error("Session validation failed");
-        //         } else {
-        //             setIsLoggedIn(true);
-        //         }
-        //     } catch (error) {
-        //         console.error("Error validating session:", error);
-        //         setIsLoggedIn(false);
-        //         navigate("/");
-        //     }
-        // };
-
-        // validateSession();
-    }, []);
 
     return (
         <>
             {isLoading && <Spinner></Spinner>}
-            <nav className="shadow-2xl text-md fixed top-0 flex flex-row justify-between w-full p-3 items-center bg-zinc-50 border-b-[rgb(128,128,128)] z-50 mb-100">
+            <nav className="shadow-2xl text-md fixed top-0 flex flex-row justify-between w-full p-3 items-center border-b border-b-[#ffffff33] bg-[#0B1416]">
                 <div className="flex flex-row items-center gap-2">
                     <MdForum size={30}></MdForum>
                     <Link to="/">
@@ -123,14 +97,48 @@ const Navbar = () => {
                                 </svg>
                             </button>
 
-                            {/*should also clear session cookie  */}
-                            <button onClick={handleLogout}>Logout</button>
+                            <button onClick={() => setToggleProfileOption(!toggleProfileOptions)}>
+                                <div className="w-[30px] h-[30px] rounded-full border border-white">
+                                    <>
+                                        {(userData.profile.profileimage != null) ? (
+                                            <img src={userData.profile.profileimage} alt="" className="object-contain rounded-full" />
+                                        ) : (
+                                            <div className="w-full h-full bg-black rounded-full"></div>
+                                        )}
+                                        <div className="relative w-[8px] h-[8px] bg-green-400 rounded-full bottom-2 left-6"></div>
+                                    </>
+                                </div>
+
+                            </button>
+
+                            <div className={`flex flex-col absolute w-[200px] right-2 top-[66px] bg-[#0F1A1C] rounded-lg text-xs ${toggleProfileOptions ? 'opacity-100 block' : 'opacity-0 hidden'} duration-200`}>
+                                <button className="flex flex-row gap-2 items-center py-2 px-3 hover:bg-[#131f23] rounded-lg">
+                                    <div className="w-[35px] h-[35px] rounded-full border border-white">
+                                        {(userData.profile.profileimage) ? (
+                                            <img src={userData.profile.profileimage} alt="" className="object-contain rounded-full" />
+                                        ) : (
+                                            <div className="w-full h-full bg-black rounded-full"></div>
+                                        )}
+                                        <div className="relative w-[8px] h-[8px] bg-green-400 rounded-full bottom-2 left-6"></div>
+                                    </div>
+                                    <div className="flex flex-col items-start">
+                                        <p className="text-sm">View Profile</p>
+                                        <p>u/{userData.profile.username}</p>
+                                    </div>
+                                </button>
+
+                                <button onClick={handleLogout} className="flex flex-row gap-2 items-center py-2 px-3 hover:bg-[#131f23] rounded-lg">
+                                    <svg rpl="" fill="currentColor" height="20" icon-name="logout-outline" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M11.991 10.625H1v-1.25h10.991l-1.933-1.933.884-.884 3 3a.624.624 0 0 1 0 .884l-3 3-.884-.884 1.933-1.933ZM15.375 1h-9.75A2.629 2.629 0 0 0 3 3.625v.792h1.25v-.792A1.377 1.377 0 0 1 5.625 2.25h9.75a1.377 1.377 0 0 1 1.375 1.375v12.75a1.377 1.377 0 0 1-1.375 1.375h-9.75a1.377 1.377 0 0 1-1.375-1.375v-.792H3v.792A2.63 2.63 0 0 0 5.625 19h9.75A2.63 2.63 0 0 0 18 16.375V3.625A2.63 2.63 0 0 0 15.375 1Z"></path>
+                                    </svg>
+                                    <p>Logout</p>
+                                </button>
+                            </div>
                         </>
                     ) : (
                         <>
-
-                            <Button label={"Register"} onClick={() => handleOpenDialog(registerRef)}></Button>
-                            <Button label={"Login"} onClick={() => handleOpenDialog(loginRef)}></Button>
+                            <Button label={"Register"} onClick={() => handleOpenDialog(registerRef)} className="text-white"></Button>
+                            <Button label={"Login"} onClick={() => handleOpenDialog(loginRef)} className="text-white"></Button>
                         </>
                     )}
                 </div>
