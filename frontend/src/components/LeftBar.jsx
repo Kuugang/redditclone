@@ -7,7 +7,7 @@ import { FaHouse } from "react-icons/fa6";
 import { AiTwotoneLike } from "react-icons/ai";
 
 function LeftBar() {
-    const { communities, setCommunities } = useContext(MyContext);
+    const { userData, communities, setCommunities } = useContext(MyContext);
     const createCommunityRef = useRef(null);
 
     const [showCommunities, setShowCommunities] = useState(true);
@@ -29,14 +29,14 @@ function LeftBar() {
             const uniqueCommunitiesByID = {};
             cs.forEach(community => {
                 if (!uniqueCommunitiesByID[community.id]) {
-                    // Add community to the object if it doesn't exist
                     uniqueCommunitiesByID[community.id] = community;
                 }
             });
             const uniqueCommunities = Object.values(uniqueCommunitiesByID);
             setCommunities(uniqueCommunities);
         }
-        getCommunities();
+        if (userData)
+            getCommunities();
     }, []);
 
     return (
@@ -94,7 +94,9 @@ function LeftBar() {
                         communities.map(community => (
                             <Link to={`/r/${community.name}`} key={community.id} className="flex flex-row gap-2 justify-start items-center px-3 py-1 rounded-lg w-full hover:bg-[#1a282d]">
                                 <div className="rounded-full w-[30px] h-[30px] bg-gray-200 border border-black">
-                                    <img src={community.communityimage} className="w-full h-full rounded-full object-cover" alt={`Community ${community.name}`} />
+                                    {community.communityimage && (
+                                        <img src={community.communityimage} className="w-full h-full rounded-full object-cover" alt={`Community ${community.name}`} />
+                                    )}
                                 </div>
                                 <p>r/{community.name}</p>
                             </Link>

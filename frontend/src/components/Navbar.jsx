@@ -42,7 +42,7 @@ const Navbar = () => {
     return (
         <>
             {isLoading && <Spinner></Spinner>}
-            <nav className="shadow-2xl text-md fixed top-0 flex flex-row justify-between w-full p-3 items-center border-b border-b-[#ffffff33] bg-[#0B1416]">
+            <nav className="shadow-2xl text-md fixed top-0 flex flex-row justify-between w-full p-3 items-center border-b border-b-[#ffffff33] bg-[#0B1416] z-50">
                 <div className="flex flex-row items-center gap-2">
                     <MdForum size={30}></MdForum>
                     <Link to="/">

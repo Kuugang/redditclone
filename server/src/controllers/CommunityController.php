@@ -31,7 +31,6 @@ class CommunityController
             case "/update":
                 $this->updateCommunity();
                 break;
-
         }
     }
     public function createCommunity(): void
@@ -129,10 +128,13 @@ class CommunityController
     {
         $user = getUser();
 
+        $requiredInputs = ['communityId'];
+        validateRequiredFields($requiredInputs);
+
         $communityId = $_POST['communityId'];
-        $name = $_POST['name'];
-        $visibility = $_POST['visibility'];
-        $about = $_POST['about'];
+        $name = isset($_POST['name']) ? $_POST['name'] : null;
+        $visibility = isset($_POST['visibility']) ? $_POST['$visibility'] : null;
+        $about = isset($_POST['about']) ? $_POST['about'] : null;
 
         $communityImageURL = isset($_FILES['communityImage']['tmp_name']) ? uploadImage("communityImage", "community-image") : null;
         $communityBannerURL = isset($_FILES['communityBanner']['tmp_name']) ? uploadImage("communityBanner", "community-banner") : null;
@@ -168,16 +170,16 @@ class CommunityController
 
         if (!empty($setClauses)) {
             $query .= implode(", ", $setClauses);
-            $query .= " , updatedat = NOW() WHERE id = :communityId AND ownerid = :ownerid";
+            $query .= " , updatedat = NOW() WHERE id = :communityId AND ownerid = :ownerid RETURNING *";
             $params[':communityId'] = $communityId;
             $params[':ownerid'] = $user['id'];
 
             try {
                 $stmt = $this->conn->prepare($query);
                 $stmt->execute($params);
-
+                $result = $stmt->fetch(PDO::FETCH_ASSOC);
                 if ($stmt->rowCount() > 0) {
-                    sendResponse(true, "Community updated successfully", 200);
+                    sendResponse(true, "Successfully updated community", 200, array("data" => array("community" => $result)));
                 } else {
                     sendResponse(false, "No changes were made to the community", 400);
                 }
