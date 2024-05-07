@@ -1,4 +1,3 @@
-
 function openModal(ref) {
     (ref.current).showModal();
 }
@@ -11,4 +10,4 @@ const handleDialogOutsideClick = (e, modalRef) => {
     }
 }
 
-export {openModal, closeModal, handleDialogOutsideClick};
+export { openModal, closeModal, handleDialogOutsideClick };

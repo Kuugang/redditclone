@@ -7,6 +7,7 @@ export default function Downvote({ vote, setVote, post, handleVote, handleDelete
     const { userData } = useContext(MyContext);
 
     useEffect(() => {
+        if (userData == null) return;
         let postVote
         if (post.votes.length > 0) {
             postVote = (post.votes).find(v => v.userid == userData.id);

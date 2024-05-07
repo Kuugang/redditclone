@@ -1,35 +1,21 @@
-import React, { useEffect, useRef, useContext, useState } from "react";
+import React, { useRef, useContext, useState } from "react";
 import Login from "./Login.jsx";
 import Register from "./Register.jsx";
-import Spinner from "./Spinner.jsx";
 import { Link } from "react-router-dom";
 import { MyContext } from "../utils/Context";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../stories/Button";
 import { MdForum } from "react-icons/md";
 import SearchBar from "../icons/SearchBar";
+import { openModal } from "../utils/functions.js";
 
 
 const Navbar = () => {
     const navigate = useNavigate();
     const { isLoggedIn, setIsLoggedIn, userData, setUserData } = useContext(MyContext);
-    const [isLoading, setIsLoading] = useState(false);
     const [toggleProfileOptions, setToggleProfileOption] = useState(false);
     const loginRef = useRef(null);
     const registerRef = useRef(null);
-    const profileRef = useRef(null);
-
-    const handleOpenDialog = (ref) => {
-        if (ref.current) {
-            ref.current.showModal();
-        }
-    };
-
-    const handleCloseDialog = (ref) => {
-        if (ref.current) {
-            ref.current.close();
-        }
-    };
 
     async function handleLogout() {
         setToggleProfileOption(false);
@@ -41,8 +27,7 @@ const Navbar = () => {
 
     return (
         <>
-            {isLoading && <Spinner></Spinner>}
-            <nav className="shadow-2xl text-md fixed top-0 flex flex-row justify-between w-full p-3 items-center border-b border-b-[#ffffff33] bg-[#0B1416] z-50">
+            <nav className="shadow-2xl text-md fixed top-0 left-0 flex flex-row justify-between w-full p-3 items-center border-b border-b-[#ffffff33] bg-[#0B1416] z-50 h-[10vh]">
                 <div className="flex flex-row items-center gap-2">
                     <MdForum size={30}></MdForum>
                     <Link to="/">
@@ -50,7 +35,6 @@ const Navbar = () => {
                     </Link>
                 </div>
                 <SearchBar></SearchBar>
-                <div>{isLoggedIn && <></>}</div>
 
                 <div className="flex flex-row gap-5 items-center">
                     {isLoggedIn == true ? (
@@ -137,24 +121,15 @@ const Navbar = () => {
                         </>
                     ) : (
                         <>
-                            <Button label={"Register"} onClick={() => handleOpenDialog(registerRef)} className="text-white"></Button>
-                            <Button label={"Login"} onClick={() => handleOpenDialog(loginRef)} className="text-white"></Button>
+                            <Button label={"Register"} onClick={() => openModal(registerRef)} className="text-white"></Button>
+                            <Button label={"Login"} onClick={() => openModal(loginRef)} className="text-white"></Button>
                         </>
                     )}
                 </div>
             </nav>
 
-            <Login
-                loginRef={loginRef}
-                handleCloseDialog={handleCloseDialog}
-                setIsLoggedIn={setIsLoggedIn}
-                isLoading={isLoading}
-                setIsLoading={setIsLoading}
-            ></Login>
-            <Register
-                registerRef={registerRef}
-                handleCloseDialog={handleCloseDialog}
-            ></Register>
+            <Login loginRef={loginRef}></Login>
+            <Register registerRef={registerRef}></Register>
         </>
     );
 };

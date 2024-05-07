@@ -51,7 +51,6 @@ const Dashboard = () => {
 
     return (
         <div className="min-h-[100vh]">
-
             {isLoggedIn && <LeftBar />}
             <Posts></Posts>
         </div>

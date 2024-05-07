@@ -8,9 +8,10 @@ export const MyContextProvider = ({ children }) => {
     const [posts, setPosts] = useState();
     const [isLoading, setIsLoading] = useState(false);
     const [communities, setCommunities] = useState([]);
+    const [userCommunities, setUserCommunities] = useState([]);
     const [userData, setUserData] = useState();
     return (
-        <MyContext.Provider value={{ isLoggedIn, setIsLoggedIn, posts, setPosts, isLoading, setIsLoading, communities, setCommunities, userData, setUserData }}>
+        <MyContext.Provider value={{ isLoggedIn, setIsLoggedIn, posts, setPosts, isLoading, setIsLoading, communities, setCommunities, userData, setUserData, userCommunities, setUserCommunities }}>
             {children}
         </MyContext.Provider>
     );

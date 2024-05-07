@@ -31,6 +31,10 @@ class CommunityController
             case "/update":
                 $this->updateCommunity();
                 break;
+            case "/public":
+                $this->getPublicCommunities();
+                break;
+
         }
     }
     public function createCommunity(): void
@@ -188,6 +192,26 @@ class CommunityController
             }
         } else {
             sendResponse(false, "No fields provided for update", 400);
+        }
+    }
+
+
+    public function getPublicCommunities()
+    {
+        try {
+            $query = "SELECT * FROM tblCommunity where visibility = 'public'";
+            if (isset($_GET['name'])) {
+                $query .= " WHERE name = :name";
+            }
+            $stmt = $this->conn->prepare($query);
+            if (isset($_GET['name'])) {
+                $stmt->bindParam(":name", $_GET['name']);
+            }
+            $stmt->execute();
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            sendResponse(true, "Successfully fetched communities", 200, array("data" => array("communities" => $result)));
+        } catch (PDOException $e) {
+            sendResponse(false, $e->getMessage(), 500);
         }
     }
 }

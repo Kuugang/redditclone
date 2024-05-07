@@ -1,14 +1,22 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import Upvote from "../icons/Upvote";
 import Downvote from "../icons/Downvote";
 import { MyContext } from '../utils/Context';
+import { openModal } from '../utils/functions';
+import Login from './Login';
 
 function Votes({ post }) {
     const { userData, posts, setPosts } = useContext(MyContext)
     const [vote, setVote] = useState();
     const [votesDisplay, setVotesDisplay] = useState(0);
+    const loginRef = useRef(null);
 
     async function handleDeleteVote(post, setVote) {
+        if (userData == null) {
+            openModal(loginRef);
+            return;
+        }
+
         try {
             let inputs = {
                 "postId": post.id
@@ -46,6 +54,10 @@ function Votes({ post }) {
     }
 
     async function handleVote(post, userVote, setVote) {
+        if (userData == null) {
+            openModal(loginRef);
+            return;
+        }
         try {
             let inputs = {
                 "postId": post.id,
@@ -109,11 +121,14 @@ function Votes({ post }) {
     }, [])
 
     return (
-        <div className={`flex flex-row items-center gap-1 bg-[#1a282d] rounded-lg p-1 ${vote == "upvote" && 'bg-[#D93A00]'} ${vote == "downvote" && 'bg-[#6A5CFF]'} `}>
-            <Upvote post={post} vote={vote} setVote={setVote} handleVote={handleVote} handleDeleteVote={handleDeleteVote}></Upvote>
-            <p className="font-semibold">{votesDisplay}</p>
-            <Downvote post={post} vote={vote} setVote={setVote} handleVote={handleVote} handleDeleteVote={handleDeleteVote}></Downvote>
-        </div>
+        <>
+            <Login loginRef={loginRef}></Login>
+            <div className={`flex flex-row items-center gap-1 bg-[#1a282d] rounded-lg p-1 ${vote == "upvote" && 'bg-[#D93A00]'} ${vote == "downvote" && 'bg-[#6A5CFF]'} `}>
+                <Upvote post={post} vote={vote} setVote={setVote} handleVote={handleVote} handleDeleteVote={handleDeleteVote}></Upvote>
+                <p className="font-semibold">{votesDisplay}</p>
+                <Downvote post={post} vote={vote} setVote={setVote} handleVote={handleVote} handleDeleteVote={handleDeleteVote}></Downvote>
+            </div>
+        </>
     )
 }
 

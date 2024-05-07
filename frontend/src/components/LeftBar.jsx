@@ -7,7 +7,7 @@ import { FaHouse } from "react-icons/fa6";
 import { AiTwotoneLike } from "react-icons/ai";
 
 function LeftBar() {
-    const { userData, communities, setCommunities } = useContext(MyContext);
+    const { userData, communities, setCommunities, userCommunities, setUserCommunities } = useContext(MyContext);
     const createCommunityRef = useRef(null);
 
     const [showCommunities, setShowCommunities] = useState(true);
@@ -34,6 +34,7 @@ function LeftBar() {
             });
             const uniqueCommunities = Object.values(uniqueCommunitiesByID);
             setCommunities(uniqueCommunities);
+            setUserCommunities(responseJSON.data.communities);
         }
         if (userData)
             getCommunities();
@@ -73,7 +74,7 @@ function LeftBar() {
                     </svg>
                 </button>
 
-                <div className={`overflow-hidden transition-all duration-100 ${showCommunities ? 'max-h-content' : 'max-h-0'} flex flex-col gap-2`}>
+                <div className={`overflow-hidden transition-all duration-200 ${showCommunities ? 'opacity-100 max-h-content' : 'h-0 opacity-0'} flex flex-col gap-2`}>
                     <button className="flex flex-row gap-3 justify-start items-center px-3 py-2 rounded-lg w-full hover:bg-[#1a282d]" onClick={() => openModal(createCommunityRef)}>
                         <svg rpl="" fill="currentColor" height="20" icon-name="add-outline" viewBox="0 0 20 20" width="16" xmlns="http://www.w3.org/2000/svg">
                             <path d="M19 9.375h-8.375V1h-1.25v8.375H1v1.25h8.375V19h1.25v-8.375H19v-1.25Z"></path>
@@ -90,8 +91,8 @@ function LeftBar() {
                         setCommunities={setCommunities}
                     ></CreateCommunity>
 
-                    {communities && (
-                        communities.map(community => (
+                    {userCommunities && (
+                        userCommunities.map(community => (
                             <Link to={`/r/${community.name}`} key={community.id} className="flex flex-row gap-2 justify-start items-center px-3 py-1 rounded-lg w-full hover:bg-[#1a282d]">
                                 <div className="rounded-full w-[30px] h-[30px] bg-gray-200 border border-black">
                                     {community.communityimage && (

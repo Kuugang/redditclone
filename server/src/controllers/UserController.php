@@ -144,10 +144,17 @@ class UserController
     {
         $user = getUser();
         try {
+            // $query = "SELECT c.*
+            //     FROM tblCommunity c
+            //     LEFT JOIN tblCommunityMember cm ON cm.communityid = c.id AND cm.id = :userid; 
+            // ";
+
             $query = "SELECT c.*
                 FROM tblCommunity c
-                LEFT JOIN tblCommunityMember cm ON cm.userid = :userid AND cm.communityid = c.id 
+                LEFT JOIN tblCommunityMember cm ON cm.communityid = c.id
+                WHERE cm.userid = :userid;
             ";
+
             $stmt = $this->conn->prepare($query);
             $stmt->bindParam(":userid", $user['id']);
             $stmt->execute();

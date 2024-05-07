@@ -1,11 +1,14 @@
-import React, { useContext } from "react";
+import React, { useContext, useloginRef } from "react";
 import Spinner from "./Spinner.jsx"; // assuming Spinner component is in JSX
 import { toast } from "react-toastify";
 import { MyContext } from "../utils/Context.jsx";
 import { IoCloseCircle } from "react-icons/io5";
+import { openModal, closeModal, handleDialogOutsideClick } from "../utils/functions.js";
 
-const Login = ({ loginRef, handleCloseDialog, setIsLoggedIn, isLoading, setIsLoading }) => {
-    const { userData, setUserData } = useContext(MyContext);
+const Login = ({ loginRef }) => {
+
+    const { isLoading, setIsLoading, setUserData, setIsLoggedIn } = useContext(MyContext);
+
     async function handleLogin(e) {
         setIsLoading(true);
         e.preventDefault();
@@ -30,7 +33,7 @@ const Login = ({ loginRef, handleCloseDialog, setIsLoggedIn, isLoading, setIsLoa
                 setUserData(jsonData.data.user);
                 toast("Logged in successfully");
                 setIsLoggedIn(true);
-                handleCloseDialog(loginRef);
+                closeModal(loginRef);
                 e.target.reset();
             } else {
                 throw new Error(jsonData.message);
@@ -42,18 +45,18 @@ const Login = ({ loginRef, handleCloseDialog, setIsLoggedIn, isLoading, setIsLoa
     }
 
     return (
-        <dialog ref={loginRef}>
+        <dialog ref={loginRef} onClick={(e) => handleDialogOutsideClick(e, loginRef)} className="bg-white/[0]">
             {isLoading && <Spinner></Spinner>}
             <form
                 onSubmit={handleLogin}
                 method="POST"
-                className="border rounded p-6 flex flex-col gap-1 w-[500px]"
+                className="p-6 flex flex-col gap-1 w-[500px] bg-[#0F1A1C]  text-white rounded-lg"
             >
                 <div className="flex flex-row justify-between ">
                     <h1 className="font-bold text-2xl">Login</h1>
                     <button
                         type="button"
-                        onClick={() => handleCloseDialog(loginRef)}
+                        onClick={() => closeModal(loginRef)}
                     >
                         <IoCloseCircle className="h-6 w-6 transition duration-300 ease-in-out hover:text-red-500" />
 
@@ -65,21 +68,21 @@ const Login = ({ loginRef, handleCloseDialog, setIsLoggedIn, isLoading, setIsLoa
                     <input
                         id="loginEmail"
                         name="email"
-                        className="border h-10 px-4 rounded-xl mb-5 w-8/12"
+                        className="h-10 px-4 rounded-xl mb-5 w-8/12 text-black"
                         type="text"
                         placeholder="Email"
                     />
                     <input
                         id="loginPassword"
                         name="password"
-                        className="border h-10 px-4 rounded-xl mb-3  w-8/12 "
+                        className="border h-10 px-4 rounded-xl mb-3  w-8/12 text-black"
                         type="password"
                         placeholder="Password"
                     />
                     <div className="flex flex-row gap-2 mt-10">
                         <p className=" text-sm">Don't have an account?</p>
                         <a className="text-sm text-blue-500" onClick={() => {
-                            handleCloseDialog(loginRef);
+                            closeModal(loginRef);
                         }}>Sign up now</a>
                     </div>
                 </div>
@@ -90,7 +93,7 @@ const Login = ({ loginRef, handleCloseDialog, setIsLoggedIn, isLoading, setIsLoa
                     Login
                 </button>
             </form>
-        </dialog>
+        </dialog >
     );
 };
 
