@@ -145,7 +145,8 @@ function Community() {
             <div className='ml-[16%] flex flex-col gap-5 p-10 min-h-screen'>
                 {community && (
                     <>
-                        <div className={`fixed w-[350px] flex flex-col gap-4 left-[3%] bg-[#0f1a1c] p-5 rounded-lg duration-500 bottom-5 transform ${isEditing == true ? 'translate-y-[3%]' : 'translate-y-[100%]'} ${hideEditAppearance ? 'translate-y-[80%]' : 'bottom-5'}`}
+                        <div className={`fixed w-[350px] flex flex-col gap-4 left-[3%] bg-[#0f1a1c] p-5 rounded-lg duration-500 transform  ${isEditing == true ? (hideEditAppearance ? 'top-[87%]' : 'top-[55%]') : 'top-[100%]'} 
+                        `}
                         >
                             <div className="flex flex-row justify-between gap-4 items-center">
                                 {currentEdit == null && (
@@ -184,7 +185,7 @@ function Community() {
                                         </svg>
                                     </button>
 
-                                    <button onClick={() => { setIsEditing(false); setCurrentEdit(null) }} className="bg-[#1A282D] rounded-full w-[40px] h-[40px] py-2 px-2 flex justify-center items-center hover:bg-[#223237]">
+                                    <button onClick={() => { setIsEditing(false); setCurrentEdit(null); setHideEditAppearance(false) }} className="bg-[#1A282D] rounded-full w-[40px] h-[40px] py-2 px-2 flex justify-center items-center hover:bg-[#223237]">
                                         <svg rpl="" fill="currentColor" height="16" icon-name="close-outline" viewBox="0 0 20 20" width="16" xmlns="http://www.w3.org/2000/svg"><path d="m18.442 2.442-.884-.884L10 9.116 2.442 1.558l-.884.884L9.116 10l-7.558 7.558.884.884L10 10.884l7.558 7.558.884-.884L10.884 10l7.558-7.558Z"></path></svg>
                                     </button>
                                 </div>
