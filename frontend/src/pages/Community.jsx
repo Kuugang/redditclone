@@ -145,7 +145,8 @@ function Community() {
             <div className='ml-[16%] flex flex-col gap-5 p-10 min-h-screen'>
                 {community && (
                     <>
-                        <div className={`fixed w-[350px] flex flex-col gap-4 left-[3%] bg-[#0f1a1c] p-5 rounded-lg duration-500 ${isEditing ? 'bottom-[3%]' : ' bottom-[-40%]'} transform ${hideEditAppearance ? 'bottom-[-30%]' : 'bottom-[3%]'}`}>
+                        <div className={`fixed w-[350px] flex flex-col gap-4 left-[3%] bg-[#0f1a1c] p-5 rounded-lg duration-500 bottom-5 transform ${isEditing == true ? 'translate-y-[3%]' : 'translate-y-[100%]'} ${hideEditAppearance ? 'translate-y-[80%]' : 'bottom-5'}`}
+                        >
                             <div className="flex flex-row justify-between gap-4 items-center">
                                 {currentEdit == null && (
                                     <p className="font-semibold">Community Appearance</p>
