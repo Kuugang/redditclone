@@ -44,11 +44,17 @@ require_once ("./src/utils.php");
 $parts = explode("/", $_SERVER["REQUEST_URI"]);
 
 
-$host = "aws-0-ap-southeast-1.pooler.supabase.com";
+$host = "localhost";
 $port = "5432";
-$dbname = "postgres";
-$user = "postgres.rafhblqrgvjzlxhigvlt";
-$password = "owgzvI0A9cLb4XDL";
+$dbname = "dbRedditClone";
+$user = "postgres";
+$password = "root";
+
+// $host = "aws-0-ap-southeast-1.pooler.supabase.com";
+// $port = "5432";
+// $dbname = "postgres";
+// $user = "postgres.rafhblqrgvjzlxhigvlt";
+// $password = "owgzvI0A9cLb4XDL";
 
 $database = new Database("$host", "$dbname", $user, $password, $port);
 
