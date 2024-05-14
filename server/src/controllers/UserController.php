@@ -12,15 +12,17 @@ class UserController
     {
         $route = '/' . implode("/", array_slice($parts, 2));
         switch ($route) {
+            case "/":
+                checkHTTPMethod(["GET"]);
+                $this->getUsers();
+                break;
             case "/register":
                 checkHTTPMethod(["POST"]);
                 $this->register();
                 break;
-
             case "/login":
                 $this->login();
                 break;
-
             case "/communities":
                 $this->getCommunities();
                 break;
@@ -28,6 +30,22 @@ class UserController
                 $this->validateSession();
                 break;
         }
+    }
+
+    public function getUsers()
+    {
+        $query = "
+            SELECT u.*,
+                ua.email AS email
+            FROM tblUserProfile u
+            LEFT JOIN tblUserAccount ua ON ua.id = u.id
+        ";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        sendResponse(true, "Successfully fetched users", 200, array("data" => array("users" => $result)));
     }
 
     public function register(): void

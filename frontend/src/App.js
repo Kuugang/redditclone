@@ -28,7 +28,6 @@ function App() {
                     setIsLoggedIn(true);
                     setUserData(responseJSON.data.user);
                 }
-
             }
         }
 
